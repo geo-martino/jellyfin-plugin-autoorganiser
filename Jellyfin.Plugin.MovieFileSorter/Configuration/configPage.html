@@ -73,6 +73,22 @@
                                 e.g. SDR, HDR
                             </div>
                         </div>
+
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h2 class="sectionTitle">Clean up settings</h2>
+                        </div>
+                        <div class="verticalSection">
+                            Configure post-sorting clean up settings
+                        </div>
+                        <div class="inputContainer">
+                            <label for="cleanIgnoreExtensions">Ignore extensions:</label>
+                            <input type="text" id="cleanIgnoreExtensions" is="emby-input" />
+                            <div class="fieldDescription">
+                                Ignore files with these extensions when determining if a directory is empty and should be removed.
+                                Separate extensions with commas e.g. <em>.srt, .ini, .txt</em>.
+                            </div>
+                        </div>
+                        
                         <div>
                             <button is="emby-button" type="submit" data-theme="b" class="raised button-submit block">
                                 <span>Save</span>
@@ -95,6 +111,7 @@
                         document.getElementById('labelCodec').checked = config.LabelCodec;
                         document.getElementById('labelBitDepth').checked = config.LabelBitDepth;
                         document.getElementById('labelDynamicRange').checked = config.LabelDynamicRange;
+                        document.getElementById('cleanIgnoreExtensions').value = config.CleanIgnoreExtensions;
                         Dashboard.hideLoadingMsg();
                     });
                 },
@@ -108,6 +125,7 @@
                         config.LabelCodec = document.getElementById('labelCodec').checked;
                         config.LabelBitDepth = document.getElementById('labelBitDepth').checked;
                         config.LabelDynamicRange = document.getElementById('labelDynamicRange').checked;
+                        config.CleanIgnoreExtensions = document.getElementById('cleanIgnoreExtensions').value;
 
                         ApiClient.updatePluginConfiguration(MovieFileSorterPluginConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);

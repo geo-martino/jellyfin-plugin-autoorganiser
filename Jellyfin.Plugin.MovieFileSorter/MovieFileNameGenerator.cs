@@ -164,7 +164,7 @@ public class MovieFileNameGenerator
     private static MediaStream GetVideoStream(Movie movie)
     {
         return movie.GetMediaStreams()
-            .Find(s => s.Type == MediaStreamType.Video)!;
+            .Find(stream => stream.Type == MediaStreamType.Video)!;
     }
 
     private string GetResolution(Movie movie)

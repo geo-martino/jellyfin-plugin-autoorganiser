@@ -14,21 +14,21 @@ namespace Jellyfin.Plugin.MovieFileSorter;
 /// </summary>
 public class FileSorterTask : IScheduledTask, IConfigurableScheduledTask
 {
-    private readonly MovieManager _movieManager;
+    private readonly MovieLibraryOrganiser _movieLibraryOrganiser;
     private readonly ILogger<FileSorterTask> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileSorterTask"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="movieLogger">Instance of the <see cref="ILogger"/> interface of type <see cref="MovieManager"/>.</param>
+    /// <param name="movieLogger">Instance of the <see cref="ILogger"/> interface of type <see cref="MovieLibraryOrganiser"/>.</param>
     /// <param name="logger">Instance of the <see cref="ILogger"/> interface of type <see cref="FileSorterTask"/>.</param>
     public FileSorterTask(
         ILibraryManager libraryManager,
-        ILogger<MovieManager> movieLogger,
+        ILogger<MovieLibraryOrganiser> movieLogger,
         ILogger<FileSorterTask> logger)
     {
-        _movieManager = new MovieManager(libraryManager, movieLogger);
+        _movieLibraryOrganiser = new MovieLibraryOrganiser(libraryManager, movieLogger);
         _logger = logger;
     }
 
@@ -58,7 +58,13 @@ public class FileSorterTask : IScheduledTask, IConfigurableScheduledTask
     {
         ArgumentNullException.ThrowIfNull(FileSorterPlugin.Instance?.Configuration);
 
+        var cleanIgnoreExtensions = FileSorterPlugin.Instance.Configuration.CleanIgnoreExtensions
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(x => x.TrimStart('.').ToLowerInvariant())
+            .ToList();
+
         var forceSubFolder = FileSorterPlugin.Instance.Configuration.ForceSubFolder;
+
         var addLabelResolution = FileSorterPlugin.Instance.Configuration.LabelResolution;
         var addLabelCodec = FileSorterPlugin.Instance.Configuration.LabelCodec;
         var addLabelBitDepth = FileSorterPlugin.Instance.Configuration.LabelBitDepth;
@@ -68,7 +74,8 @@ public class FileSorterTask : IScheduledTask, IConfigurableScheduledTask
         var fileNameGenerator = new MovieFileNameGenerator(
             addLabelResolution, addLabelCodec, addLabelBitDepth, addLabelDynamicRange);
 
-        _movieManager.OrganiseMovies(filePathGenerator, fileNameGenerator, cancellationToken);
+        _movieLibraryOrganiser.OrganiseMovies(filePathGenerator, fileNameGenerator, progress, cancellationToken);
+        _movieLibraryOrganiser.CleanLibrary(cleanIgnoreExtensions);
 
         return Task.CompletedTask;
     }

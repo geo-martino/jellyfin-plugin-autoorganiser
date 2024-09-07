@@ -13,12 +13,25 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
+        CleanIgnoreExtensions = string.Empty;
+
+        ForceSubFolder = false;
+
         LabelResolution = false;
         LabelCodec = false;
         LabelBitDepth = false;
         LabelDynamicRange = false;
-        ForceSubFolder = false;
     }
+
+    /// <summary>
+    /// Gets or sets the extensions to ignore when removing empty directories in a library.
+    /// </summary>
+    public string CleanIgnoreExtensions { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to always put movie files in sub-folder.
+    /// </summary>
+    public bool ForceSubFolder { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video resolution on the file name's label.
@@ -39,9 +52,4 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether to add the video range on the file name's label.
     /// </summary>
     public bool LabelDynamicRange { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to always put movie files in sub-folder.
-    /// </summary>
-    public bool ForceSubFolder { get; set; }
 }

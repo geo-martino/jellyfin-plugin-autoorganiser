@@ -31,12 +31,12 @@ public class MovieFilePathGenerator
     /// <returns>The file path for the movie.</returns>
     public string GeneratePath(Movie movie, IReadOnlyCollection<BoxSet> boxSets, MovieFileNameGenerator fileNameGenerator)
     {
-        var path = movie.GetTopParent().GetTopParent().Path;
-        path = AppendBoxSetName(movie, path, fileNameGenerator, boxSets);
-        path = AppendSubFolder(movie, path, fileNameGenerator);
+        var parentPath = movie.GetTopParent().GetTopParent().Path;
+        parentPath = AppendBoxSetName(movie, parentPath, fileNameGenerator, boxSets);
+        parentPath = AppendSubFolder(movie, parentPath, fileNameGenerator);
 
         var fileName = fileNameGenerator.GetFileName(movie);
-        return Path.Combine(path, fileName);
+        return Path.Combine(parentPath, fileName);
     }
 
     private string AppendBoxSetName(
@@ -45,9 +45,9 @@ public class MovieFilePathGenerator
         var boxSet = boxSets
             .FirstOrDefault(bs => bs
                 .GetRecursiveChildren()
-                .Where(i => i.GetBaseItemKind() == BaseItemKind.Movie)
+                .Where(item => item.GetBaseItemKind() == BaseItemKind.Movie)
                 .OfType<Movie>()
-                .FirstOrDefault(m => m.Id.Equals(movie.Id)) is not null);
+                .FirstOrDefault(item => item.Id.Equals(movie.Id)) is not null);
 
         if (boxSet is not null)
         {
