@@ -58,11 +58,11 @@ public class FileSorterTask : IScheduledTask, IConfigurableScheduledTask
     {
         ArgumentNullException.ThrowIfNull(FileSorterPlugin.Instance?.Configuration);
 
+        var forceSubFolder = FileSorterPlugin.Instance.Configuration.ForceSubFolder;
         var addLabelResolution = FileSorterPlugin.Instance.Configuration.LabelResolution;
         var addLabelCodec = FileSorterPlugin.Instance.Configuration.LabelCodec;
         var addLabelBitDepth = FileSorterPlugin.Instance.Configuration.LabelBitDepth;
         var addLabelDynamicRange = FileSorterPlugin.Instance.Configuration.LabelDynamicRange;
-        var forceSubFolder = FileSorterPlugin.Instance.Configuration.ForceSubFolder;
 
         var filePathGenerator = new MovieFilePathGenerator(forceSubFolder);
         var fileNameGenerator = new MovieFileNameGenerator(

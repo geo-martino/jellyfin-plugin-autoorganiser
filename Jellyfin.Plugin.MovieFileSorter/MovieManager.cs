@@ -63,6 +63,28 @@ public class MovieManager
         return movies;
     }
 
+    private Task? OrganiseMovie(
+        Movie movie,
+        IReadOnlyCollection<BoxSet> boxSets,
+        MovieFilePathGenerator filePathGenerator,
+        MovieFileNameGenerator fileNameGenerator,
+        CancellationToken cancellationToken)
+    {
+        var newPath = filePathGenerator.GeneratePath(movie, boxSets, fileNameGenerator);
+        if (movie.Path == newPath)
+        {
+            return null;
+        }
+
+        _logger.LogInformation("Moving '{Old}' to '{New}'", movie.Path, newPath);
+        var dirPath = Path.GetDirectoryName(newPath);
+        Directory.CreateDirectory(dirPath!);
+        File.Move(movie.Path, newPath);
+
+        movie.Path = newPath;
+        return movie.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
+    }
+
     /// <summary>
     /// Organises all movies in the library by moving the files to new paths based on the given generator.
     /// </summary>
@@ -75,28 +97,13 @@ public class MovieManager
         CancellationToken cancellationToken)
     {
         var boxSets = GetBoxSetsFromLibrary().ToList();
-        var moviePathsMap = GetMoviesFromLibrary()
-            .ToDictionary(
-                movie => movie,
-                movie => filePathGenerator.GeneratePath(movie, boxSets, fileNameGenerator));
+        var tasks = GetMoviesFromLibrary()
+            .Select(m => OrganiseMovie(m, boxSets, filePathGenerator, fileNameGenerator, cancellationToken))
+            .Where(t => t is not null)
+            .OfType<Task>()
+            .ToList();
 
-        var tasks = new List<Task>();
-        foreach (var pair in moviePathsMap)
-        {
-            if (pair.Key.Path == pair.Value)
-            {
-                continue;
-            }
-
-            _logger.LogInformation("Moving '{Old}' to '{New}'", pair.Key.Path, pair.Value);
-            var dirPath = Path.GetDirectoryName(pair.Value);
-            Directory.CreateDirectory(dirPath!);
-            File.Move(pair.Key.Path, pair.Value);
-
-            pair.Key.Path = pair.Value;
-            tasks.Add(pair.Key.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken));
-        }
-
+        _logger.LogInformation("Updating metadata on {N} moved files", tasks.Count);
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 }

@@ -21,10 +21,10 @@ public class MovieFileNameGenerator
     /// <summary>
     /// Initializes a new instance of the <see cref="MovieFileNameGenerator"/> class.
     /// </summary>
-    /// <param name="addLabelResolution">Whether to the video resolution as part of the file name's label.</param>
-    /// <param name="addLabelCodec">Whether to the video codec as part of the file name's label.</param>
-    /// <param name="addLabelBitDepth">Whether to the video bit depth as part of the file name's label.</param>
-    /// <param name="addLabelDynamicRange">Whether to the video dynamic range as part of the file name's label.</param>
+    /// <param name="addLabelResolution">Whether to add the video resolution as part of the file name's label.</param>
+    /// <param name="addLabelCodec">Whether to add the video codec as part of the file name's label.</param>
+    /// <param name="addLabelBitDepth">Whether to add the video bit depth as part of the file name's label.</param>
+    /// <param name="addLabelDynamicRange">Whether to add the video dynamic range as part of the file name's label.</param>
     public MovieFileNameGenerator(
         bool addLabelResolution,
         bool addLabelCodec,
