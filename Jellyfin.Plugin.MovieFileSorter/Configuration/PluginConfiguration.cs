@@ -1,22 +1,6 @@
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.Template.Configuration;
-
-/// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
-{
-    /// <summary>
-    /// Option one.
-    /// </summary>
-    OneOption,
-
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption
-}
+namespace Jellyfin.Plugin.MovieFileSorter.Configuration;
 
 /// <summary>
 /// Plugin configuration.
@@ -29,29 +13,35 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
-        Options = SomeOptions.AnotherOption;
-        TrueFalseSetting = true;
-        AnInteger = 2;
-        AString = "string";
+        LabelResolution = false;
+        LabelCodec = false;
+        LabelBitDepth = false;
+        LabelDynamicRange = false;
+        ForceSubFolder = false;
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
+    /// Gets or sets a value indicating whether to add the video resolution on the file name's label.
     /// </summary>
-    public bool TrueFalseSetting { get; set; }
+    public bool LabelResolution { get; set; }
 
     /// <summary>
-    /// Gets or sets an integer setting.
+    /// Gets or sets a value indicating whether to add the video codec on the file name's label.
     /// </summary>
-    public int AnInteger { get; set; }
+    public bool LabelCodec { get; set; }
 
     /// <summary>
-    /// Gets or sets a string setting.
+    /// Gets or sets a value indicating whether to add the video bit depth on the file name's label.
     /// </summary>
-    public string AString { get; set; }
+    public bool LabelBitDepth { get; set; }
 
     /// <summary>
-    /// Gets or sets an enum option.
+    /// Gets or sets a value indicating whether to add the video range on the file name's label.
     /// </summary>
-    public SomeOptions Options { get; set; }
+    public bool LabelDynamicRange { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to always put movie files in sub-folder.
+    /// </summary>
+    public bool ForceSubFolder { get; set; }
 }
