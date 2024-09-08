@@ -11,9 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 
-/// <summary>
-/// File organiser task.
-/// </summary>
+/// <inheritdoc />
 public class ShowOrganiserTask : AutoOrganiserTask
 {
     private readonly LibraryOrganiser _libraryOrganiser;

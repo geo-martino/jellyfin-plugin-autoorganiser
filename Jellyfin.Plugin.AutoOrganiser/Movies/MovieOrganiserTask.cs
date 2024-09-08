@@ -11,9 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 
-/// <summary>
-/// Movie Organiser task.
-/// </summary>
+/// <inheritdoc />
 public class MovieOrganiserTask : AutoOrganiserTask
 {
     private readonly LibraryOrganiser _libraryOrganiser;
