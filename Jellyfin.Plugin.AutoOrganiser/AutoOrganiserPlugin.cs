@@ -1,25 +1,25 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Jellyfin.Plugin.MovieFileSorter.Configuration;
+using Jellyfin.Plugin.AutoOrganiser.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
-namespace Jellyfin.Plugin.MovieFileSorter;
+namespace Jellyfin.Plugin.AutoOrganiser;
 
 /// <summary>
 /// The main plugin.
 /// </summary>
-public class FileSorterPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class AutoOrganiserPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileSorterPlugin"/> class.
+    /// Initializes a new instance of the <see cref="AutoOrganiserPlugin"/> class.
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    public FileSorterPlugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+    public AutoOrganiserPlugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
@@ -28,16 +28,16 @@ public class FileSorterPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Gets the current plugin instance.
     /// </summary>
-    public static FileSorterPlugin? Instance { get; private set; }
+    public static AutoOrganiserPlugin? Instance { get; private set; }
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("5D5FAFD8-886C-442C-ADE9-7B5E39F908BD");
 
     /// <inheritdoc />
-    public override string Name => "Movie File Sorter";
+    public override string Name => "Auto-Organiser";
 
     /// <inheritdoc />
-    public override string Description => "Renames and sorts movie files.";
+    public override string Description => "Automatically organise and rename files.";
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()

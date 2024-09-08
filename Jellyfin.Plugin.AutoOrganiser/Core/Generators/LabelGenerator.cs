@@ -1,31 +1,27 @@
-using System.Collections.Generic;
-using System.IO;
-using MediaBrowser.Controller.Entities.Movies;
+using J2N.Collections.Generic;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
-namespace Jellyfin.Plugin.MovieFileSorter;
+namespace Jellyfin.Plugin.AutoOrganiser.Core.Generators;
 
 /// <summary>
-/// Generates a file name from the given configuration for a movie based on its metadata.
+/// Handles label generation for use in a file name for an item.
 /// </summary>
-public class MovieFileNameGenerator
+public class LabelGenerator
 {
     private readonly bool _addLabelResolution;
     private readonly bool _addLabelCodec;
     private readonly bool _addLabelBitDepth;
     private readonly bool _addLabelDynamicRange;
 
-    private readonly Dictionary<int, int> _widthHeightMap4X3;
-    private readonly Dictionary<int, int> _widthHeightMap16X9;
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="MovieFileNameGenerator"/> class.
+    /// Initializes a new instance of the <see cref="LabelGenerator"/> class.
     /// </summary>
     /// <param name="addLabelResolution">Whether to add the video resolution as part of the file name's label.</param>
     /// <param name="addLabelCodec">Whether to add the video codec as part of the file name's label.</param>
     /// <param name="addLabelBitDepth">Whether to add the video bit depth as part of the file name's label.</param>
     /// <param name="addLabelDynamicRange">Whether to add the video dynamic range as part of the file name's label.</param>
-    public MovieFileNameGenerator(
+    public LabelGenerator(
         bool addLabelResolution,
         bool addLabelCodec,
         bool addLabelBitDepth,
@@ -36,7 +32,7 @@ public class MovieFileNameGenerator
         _addLabelBitDepth = addLabelBitDepth;
         _addLabelDynamicRange = addLabelDynamicRange;
 
-        _widthHeightMap4X3 = new Dictionary<int, int>
+        WidthHeightMap4X3 = new Dictionary<int, int>
         {
             { 320, 240 },
             { 640, 480 },
@@ -65,7 +61,7 @@ public class MovieFileNameGenerator
             { 8192, 6144 },
         };
 
-        _widthHeightMap16X9 = new Dictionary<int, int>
+        WidthHeightMap16X9 = new Dictionary<int, int>
         {
             { 640, 360 },
             { 854, 480 },
@@ -89,44 +85,19 @@ public class MovieFileNameGenerator
         };
     }
 
-    /// <summary>
-    /// Generates a file name for a given movie based on its metadata.
-    /// </summary>
-    /// <param name="movie">Instance of the <see cref="Movie"/> interface.</param>
-    /// <returns>The file name for the movie.</returns>
-    public string GetFileName(Movie movie)
-    {
-        var fileName = SanitiseValue(movie.Name);
-        fileName = AppendYear(movie, fileName);
-        fileName = AppendLabel(movie, fileName);
+    private Dictionary<int, int> WidthHeightMap4X3 { get; }
 
-        return $"{fileName}{Path.GetExtension(movie.Path)}";
-    }
+    private Dictionary<int, int> WidthHeightMap16X9 { get; }
 
     /// <summary>
-    /// Sanitises a file/directory name ensuring it does not contain any invalid characters.
+    /// Adds a label as a suffix to the given file name for a given item.
     /// </summary>
-    /// <param name="value">The value to be sanitised.</param>
-    /// <returns>The sanitised value.</returns>
-    public string SanitiseValue(string value)
+    /// <param name="item">The item to generate a label for.</param>
+    /// <param name="fileName">The file name to enrich.</param>
+    /// <returns>The enriched file name.</returns>
+    public string AppendLabel(BaseItem item, string fileName)
     {
-        return string.Join("_", value.Split(Path.GetInvalidFileNameChars()));
-    }
-
-    private string AppendYear(Movie movie, string fileName)
-    {
-        var year = movie.PremiereDate?.Year;
-        if (year is not null)
-        {
-            fileName += $" ({year})";
-        }
-
-        return fileName;
-    }
-
-    private string AppendLabel(Movie movie, string fileName)
-    {
-        var label = GetLabel(movie);
+        var label = GetLabel(item);
         if (label is not null)
         {
             fileName += $" - [{label}]";
@@ -135,46 +106,64 @@ public class MovieFileNameGenerator
         return fileName;
     }
 
-    private string? GetLabel(Movie movie)
+    /// <summary>
+    /// Generate a label for a given item.
+    /// </summary>
+    /// <param name="item">The item to generate a label for.</param>
+    /// <returns>The generated label.</returns>
+    public string? GetLabel(BaseItem item)
     {
         var labelParts = new List<string>();
         if (_addLabelResolution)
         {
-            labelParts.Add(GetResolution(movie));
+            labelParts.Add(GetResolution(item));
         }
 
         if (_addLabelCodec)
         {
-            labelParts.Add(GetCodec(movie));
+            var codec = GetCodec(item);
+            if (codec is not null)
+            {
+                labelParts.Add(codec);
+            }
         }
 
         if (_addLabelBitDepth)
         {
-            labelParts.Add(GetBitDepth(movie));
+            var bitDepth = GetBitDepth(item);
+            if (bitDepth is not null)
+            {
+                labelParts.Add(bitDepth);
+            }
         }
 
         if (_addLabelDynamicRange)
         {
-            labelParts.Add(GetDynamicRange(movie));
+            var dynamicRange = GetDynamicRange(item);
+            if (dynamicRange is not null)
+            {
+                labelParts.Add(dynamicRange);
+            }
         }
 
         return labelParts.Count > 0 ? string.Join(' ', labelParts) : null;
     }
 
-    private static MediaStream GetVideoStream(Movie movie)
+    private static MediaStream? GetVideoStream(BaseItem item)
     {
-        return movie.GetMediaStreams()
-            .Find(stream => stream.Type == MediaStreamType.Video)!;
+        return item.GetMediaStreams()
+            .Find(stream => stream.Type == MediaStreamType.Video);
     }
 
-    private string GetResolution(Movie movie)
+    private string GetResolution(BaseItem item)
     {
-        var isSquare = movie.AspectRatio == "4:3" || (double)movie.Width / movie.Height < 1.35;
-        var widthHeightMap = isSquare ? _widthHeightMap4X3 : _widthHeightMap16X9;
+        var stream = GetVideoStream(item);
 
-        var stream = GetVideoStream(movie);
-        var height = CalculateHeight(movie.Width, movie.Height, widthHeightMap);
-        var type = stream.IsInterlaced ? "i" : "p";
+        var isSquare = stream?.AspectRatio == "4:3" || (double)item.Width / item.Height < 1.35;
+        var widthHeightMap = isSquare ? WidthHeightMap4X3 : WidthHeightMap16X9;
+
+        var height = CalculateHeight(item.Width, item.Height, widthHeightMap);
+        var type = stream?.IsInterlaced ?? false ? "i" : "p";
 
         return $"{height}{type}";
     }
@@ -193,18 +182,20 @@ public class MovieFileNameGenerator
         return height;
     }
 
-    private static string GetCodec(Movie movie)
+    private static string? GetCodec(BaseItem item)
     {
-        return GetVideoStream(movie).Codec.ToUpperInvariant();
+        return GetVideoStream(item)?.Codec.ToUpperInvariant();
     }
 
-    private static string GetBitDepth(Movie movie)
+    private static string? GetBitDepth(BaseItem item)
     {
-        return $"{GetVideoStream(movie).BitDepth}bit";
+        var stream = GetVideoStream(item);
+        return stream is not null ? $"{stream.BitDepth}bit" : null;
     }
 
-    private static string GetDynamicRange(Movie movie)
+    private static string? GetDynamicRange(BaseItem item)
     {
-        return GetVideoStream(movie).VideoRange.ToString();
+        var stream = GetVideoStream(item);
+        return stream?.VideoRange.ToString();
     }
 }

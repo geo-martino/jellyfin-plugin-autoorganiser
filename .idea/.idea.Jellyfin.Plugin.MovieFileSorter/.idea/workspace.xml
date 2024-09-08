@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a4e5dc7f-6fec-4f02-8771-f3ac532f1973" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/indexLayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Jellyfin.Plugin.MovieFileSorter/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter.sln" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/Configuration/PluginConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/Configuration/PluginConfiguration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/Configuration/configPage.html" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/Configuration/configPage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/FileSorterPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/FileOrganiserPlugin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/FileSorterTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/FileOrganiserTask.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/Jellyfin.Plugin.MovieFileSorter.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/Jellyfin.Plugin.MovieFileOrganiser.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/MovieFileNameGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieFileNameGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/MovieFilePathGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieFilePathGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileSorter/MovieLibraryOrganiser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieLibraryOrganiser.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/build.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/Configuration/PluginConfiguration.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/FileOrganiserPlugin.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/FileOrganiserTask.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieFileNameGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieFilePathGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/MovieLibraryOrganiser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Jellyfin.Plugin.MovieFileOrganiser/bin/Release/net6.0/Jellyfin.Plugin.MovieFileSorter.deps.json" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/dd601e4ca8404f2c873e55fdefb34c7274508/00/5af26b71/String.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/35f3a54f5acb408a3e219b2de039f1a39557b7e4515f11238cba07b60c0ce/Task.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/7c12d04031cabe978a41644b5af6e6fd337beed5382cd22b1be3dd997b3a3/IScheduledTask.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/8bee64d50df207991e33a95fceb50d15369caee29874fb919b40bd18b110/ILibraryManager.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1e4276891015362523a3e63f294ac88ff320eae7b65cdd1a11f2472cf4641/ItemSortBy.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f0f12735ab5c1ad577e51362aebefa5e562d5aaded4d0a9078dd7769bba0c0/ILocalizationManager.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file:///usr/local/share/dotnet/sdk/8.0.401/NuGet.props" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/local/share/dotnet/sdk/8.0.401/Sdks/Microsoft.NET.Sdk/Sdk/UseArtifactsOutputPath.props" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/local/share/dotnet/sdk/8.0.401/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_8_all.globalconfig" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2liA9bpSRucUgEZek2A3qUlM5U6" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;SolutionBuilderGeneralOptionsPage&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a4e5dc7f-6fec-4f02-8771-f3ac532f1973" name="Changes" comment="" />
+      <created>1725652372621</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1725652372621</updated>
+      <workItem from="1725652373731" duration="17749000" />
+      <workItem from="1725673982095" duration="582000" />
+      <workItem from="1725674572396" duration="32559000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
