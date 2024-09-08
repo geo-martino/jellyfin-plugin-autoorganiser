@@ -75,17 +75,19 @@ public class LibraryCleaner
         var logPrefix = dryRun ? "DRY RUN | Deleting" : "Deleting";
         _logger.LogInformation("{Prefix:l} directory {Dir}", logPrefix, directory);
 
-        if (dryRun)
-        {
-            return;
-        }
-
         foreach (var file in Directory.GetFiles(directory))
         {
-            File.Delete(file);
+            _logger.LogInformation("{Prefix:l} file {Dir}", logPrefix, file);
+            if (!dryRun)
+            {
+                File.Delete(file);
+            }
         }
 
-        Directory.Delete(directory, false);
+        if (!dryRun)
+        {
+            Directory.Delete(directory, false);
+        }
     }
 
     private IEnumerable<string> GetFilesInDirectory(string directory, IReadOnlyCollection<string> ignoreExtensions)

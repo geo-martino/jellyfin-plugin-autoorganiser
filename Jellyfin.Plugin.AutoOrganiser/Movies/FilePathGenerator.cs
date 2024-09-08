@@ -50,7 +50,8 @@ public class FilePathGenerator : IFilePathGenerator<Movie, FileNameGenerator>
         boxSetName = nameGenerator.AppendYear(boxSet, boxSetName);
 
         var paths = boxSet.GetRecursiveChildren()
-            .Where(i => i.GetBaseItemKind() == BaseItemKind.Movie)
+            .Where(i => i.GetBaseItemKind() == BaseItemKind.Movie && Path.Exists(i.Path))
+            .Where(i => i.GetTopParent() is not null)
             .OfType<Movie>()
             .Select(movie => new Tuple<Movie, string>(
                 movie, Path.Combine(movie.GetTopParent().Path, boxSetName, GetBasePath(movie, nameGenerator))));
