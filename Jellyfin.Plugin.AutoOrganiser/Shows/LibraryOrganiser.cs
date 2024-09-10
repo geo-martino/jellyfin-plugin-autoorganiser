@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.AutoOrganiser.Core;
-using Jellyfin.Plugin.AutoOrganiser.Core.Library;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
@@ -13,19 +13,45 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 
-/// <inheritdoc />
-public class LibraryOrganiser : LibraryOrganiser<Episode, FileNameGenerator, FilePathGenerator>
+/// <summary>
+/// Handles organising items within a given library.
+/// </summary>
+public class LibraryOrganiser
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LibraryOrganiser"/> class.
+    /// </summary>
+    /// <param name="itemHandler">Instance of the <see cref="ItemHandler"/>.</param>
+    /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
+    /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
     public LibraryOrganiser(
+        ItemHandler itemHandler,
         ILibraryManager libraryManager,
-        ILogger<ILibraryOrganiser<Episode, FileNameGenerator, FilePathGenerator>> logger) : base(libraryManager, logger)
+        ILogger<LibraryOrganiser> logger)
     {
+        ItemHandler = itemHandler;
+
+        LibraryManager = libraryManager;
+        Logger = logger;
     }
 
-    private IEnumerable<Series> GetShowsFromLibrary()
-    {
-        var shows = LibraryManager.GetItemList(new InternalItemsQuery
+    /// <summary>
+    /// Gets the instance of the <see cref="ItemHandler"/>.
+    /// </summary>
+    private ItemHandler ItemHandler { get; }
+
+    /// <summary>
+    /// Gets the library manager.
+    /// </summary>
+    private ILibraryManager LibraryManager { get; }
+
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
+    private ILogger<LibraryOrganiser> Logger { get; }
+
+    private IEnumerable<Series> GetShowsFromLibrary() => LibraryManager
+        .GetItemList(new InternalItemsQuery
         {
             IncludeItemTypes = [BaseItemKind.Series],
             IsVirtualItem = false,
@@ -36,81 +62,85 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileNameGenerator, Fil
             Recursive = true
         }).OfType<Series>().Where(series => Directory.Exists(series.Path));
 
-        return shows;
-    }
-
-    /// <inheritdoc />
-    public override async void Organise(
-        FileNameGenerator nameGenerator,
-        FilePathGenerator pathGenerator,
-        bool dryRun,
-        ProgressHandler progressHandler,
-        CancellationToken cancellationToken)
+    /// <summary>
+    /// Organises all items in the current library by moving the files to new paths based on the given formatters.
+    /// </summary>
+    /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
+    /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
+    public void Organise(ProgressHandler progressHandler, CancellationToken cancellationToken)
     {
-        var shows = GetShowsFromLibrary().ToList();
-        Logger.LogInformation("Found {N} shows to organise", shows.Count);
+        var shows = GetShowsFromLibrary().ToArray();
+        Logger.LogInformation("Found {N} shows to organise", shows.Length);
 
         progressHandler.SetProgressToInitial();
         var tasks = shows
-            .Select((series, idx) => progressHandler.Progress(idx, shows.Count, series))
-            .SelectMany(series => OrganiseShow(series, pathGenerator, nameGenerator, dryRun, cancellationToken))
+            .Select((series, idx) => progressHandler.Progress(idx, shows.Length, series))
+            .SelectMany(series => OrganiseFolder(series, cancellationToken))
             .Where(task => task is not null)
             .OfType<Task>()
-            .ToList();
+            .ToArray();
+
         progressHandler.SetProgressToFinal();
-
-        var logPrefix = dryRun ? "DRY RUN | Updating" : "Updating";
-        Logger.LogInformation("{Prefix:l} metadata on {N} moved items", logPrefix, tasks.Count);
-        await Task.WhenAll(tasks).ConfigureAwait(false);
+        ItemHandler.RunUpdateMetadataTasks(tasks);
     }
 
-    private IEnumerable<Task?> OrganiseShow(
-        Series series,
-        FilePathGenerator pathGenerator,
-        FileNameGenerator nameGenerator,
-        bool dryRun,
-        CancellationToken cancellationToken)
+    private IEnumerable<Task?> OrganiseFolder(Folder folder, CancellationToken cancellationToken)
     {
-        var newPath = pathGenerator.GeneratePath(series, nameGenerator);
-        yield return MoveItem(series, newPath, dryRun, cancellationToken);
-
-        var tasks = series.GetRecursiveChildren()
-            .Where(item => item.GetBaseItemKind() == BaseItemKind.Season)
-            .OfType<Season>()
-            .Where(season => Directory.Exists(season.Path))
-            .SelectMany(season => OrganiseSeason(
-                    season, pathGenerator, nameGenerator, dryRun, cancellationToken));
+        var tasks = OrganiseChildren(folder, cancellationToken);
 
         foreach (var task in tasks)
         {
             yield return task;
         }
-    }
 
-    private IEnumerable<Task?> OrganiseSeason(
-        Season season,
-        FilePathGenerator pathGenerator,
-        FileNameGenerator nameGenerator,
-        bool dryRun,
-        CancellationToken cancellationToken)
-    {
-        var newPath = pathGenerator.GeneratePath(season, nameGenerator);
-        yield return MoveItem(season, newPath, dryRun, cancellationToken);
-
-        var tasks = season
-            .GetRecursiveChildren()
-            .Where(item => item.GetBaseItemKind() == BaseItemKind.Episode)
-            .OfType<Episode>()
-            .Where(episode => File.Exists(episode.Path))
-            .Select(episode =>
-            {
-                var newEpisodePath = pathGenerator.GeneratePath(episode, nameGenerator);
-                return MoveItem(episode, newEpisodePath, dryRun, cancellationToken);
-            });
-
-        foreach (var task in tasks)
+        var newPath = folder switch
         {
-            yield return task;
+            Series series => ItemHandler.PathFormatter.Format(series),
+            Season season => ItemHandler.PathFormatter.Format(season),
+            _ => null
+        };
+
+        if (newPath != null && folder.Path != newPath)
+        {
+            yield return ItemHandler.UpdatePathMetadata(folder, newPath, cancellationToken);
         }
     }
+
+    private IEnumerable<Task?> OrganiseChildren(Folder folder, CancellationToken cancellationToken) => folder switch
+    {
+        Series series => OrganiseChildSeasons(series, cancellationToken)
+            .Concat(OrganiseChildEpisodes(series, cancellationToken)),
+        Season season => OrganiseChildEpisodes(season, cancellationToken)
+            .Concat(OrganiseExtras(season, cancellationToken)),
+        _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, "Unrecognized show folder type")
+    };
+
+    private IEnumerable<Task?> OrganiseChildSeasons(Folder folder, CancellationToken cancellationToken) => folder
+        .GetRecursiveChildren(item => item.GetBaseItemKind() == BaseItemKind.Season)
+        .OfType<Season>()
+        .Where(season => Directory.Exists(season.Path))
+        .SelectMany(season => OrganiseFolder(season, cancellationToken));
+
+    private IEnumerable<Task?> OrganiseChildEpisodes(Folder folder, CancellationToken cancellationToken) => folder
+        .GetRecursiveChildren(item => item.GetBaseItemKind() == BaseItemKind.Episode)
+        .OfType<Episode>()
+        .Where(episode => File.Exists(episode.Path))
+        .Select(episode => OrganiseEpisode(episode, cancellationToken));
+
+    private Task? OrganiseEpisode(Episode episode, CancellationToken cancellationToken)
+    {
+        if (episode.Series is null)
+        {
+            Logger.LogWarning(
+                "Cannot process episode: it has not been assigned to a series | {Episode} ",
+                episode.Path);
+            return null;
+        }
+
+        var newEpisodePath = ItemHandler.PathFormatter.Format(episode);
+        return ItemHandler.MoveItem(episode, newEpisodePath, cancellationToken);
+    }
+
+    private IEnumerable<Task?> OrganiseExtras(Season season, CancellationToken cancellationToken) => ItemHandler
+        .MoveExtras(season.GetExtras().ToArray(), cancellationToken, season);
 }

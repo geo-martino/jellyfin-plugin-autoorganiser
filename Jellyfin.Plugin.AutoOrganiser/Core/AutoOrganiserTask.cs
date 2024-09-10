@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Model.Tasks;
@@ -37,8 +36,5 @@ public abstract class AutoOrganiserTask : IScheduledTask, IConfigurableScheduled
     public abstract Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken);
 
     /// <inheritdoc />
-    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
-    {
-        return Enumerable.Empty<TaskTriggerInfo>();
-    }
+    public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() => [];
 }

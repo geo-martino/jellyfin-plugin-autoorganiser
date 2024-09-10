@@ -37,7 +37,8 @@ public class LibraryCleaner
     public void CleanLibrary(CollectionTypeOptions kind, IReadOnlyCollection<string> ignoreExtensions, bool dryRun)
     {
         _logger.LogInformation(
-            "Cleaning library of empty folders, ignoring extensions: {0:l}", string.Join(", ", ignoreExtensions));
+            "Cleaning library of empty folders. Case-insensitively ignoring extensions: {0:l}",
+            string.Join(", ", ignoreExtensions));
 
         var parentDirectories = _libraryManager.GetVirtualFolders()
             .Where(virtualFolder => virtualFolder.CollectionType == kind)
@@ -47,7 +48,7 @@ public class LibraryCleaner
         {
             _logger.LogInformation("Cleaning folder: {0}", parentDirectory);
 
-            foreach (var directory in Directory.GetDirectories(parentDirectory))
+            foreach (var directory in Directory.EnumerateDirectories(parentDirectory))
             {
                 RemoveEmptyDirectories(directory, ignoreExtensions, dryRun);
             }
@@ -61,21 +62,20 @@ public class LibraryCleaner
             return;
         }
 
-        foreach (var dir in Directory.GetDirectories(directory))
+        foreach (var dir in Directory.EnumerateDirectories(directory))
         {
             RemoveEmptyDirectories(dir, ignoreExtensions, dryRun);
         }
 
-        var files = GetFilesInDirectory(directory, ignoreExtensions).ToList();
-        if (files.Count > 0 || Directory.GetDirectories(directory).Length > 0)
+        var files = GetFilesInDirectory(directory, ignoreExtensions).ToArray();
+        if (files.Length > 0 || Directory.GetDirectories(directory).Length > 0)
         {
             return;
         }
 
         var logPrefix = dryRun ? "DRY RUN | Deleting" : "Deleting";
-        _logger.LogInformation("{Prefix:l} directory {Dir}", logPrefix, directory);
 
-        foreach (var file in Directory.GetFiles(directory))
+        foreach (var file in Directory.EnumerateFiles(directory))
         {
             _logger.LogInformation("{Prefix:l} file {Dir}", logPrefix, file);
             if (!dryRun)
@@ -84,17 +84,15 @@ public class LibraryCleaner
             }
         }
 
+        _logger.LogInformation("{Prefix:l} directory {Dir}", logPrefix, directory);
         if (!dryRun)
         {
             Directory.Delete(directory, false);
         }
     }
 
-    private IEnumerable<string> GetFilesInDirectory(string directory, IReadOnlyCollection<string> ignoreExtensions)
-    {
-        var files = Directory.GetFiles(directory)
-            .Where(file => !ignoreExtensions.Contains(Path.GetExtension(file).TrimStart('.').ToLowerInvariant()));
-
-        return files;
-    }
+    private IEnumerable<string> GetFilesInDirectory(
+        string directory, IReadOnlyCollection<string> ignoreExtensions) => Directory
+        .EnumerateFiles(directory)
+        .Where(file => !ignoreExtensions.Contains(Path.GetExtension(file).TrimStart('.').ToLowerInvariant()));
 }

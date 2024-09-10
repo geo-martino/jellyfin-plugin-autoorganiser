@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.AutoOrganiser.Core;
-using Jellyfin.Plugin.AutoOrganiser.Core.Generators;
+using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using Jellyfin.Plugin.AutoOrganiser.Core.Library;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
@@ -14,22 +14,28 @@ namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 /// <inheritdoc />
 public class ShowOrganiserTask : AutoOrganiserTask
 {
-    private readonly LibraryOrganiser _libraryOrganiser;
-    private readonly LibraryCleaner _libraryCleaner;
+    private readonly ILibraryManager _libraryManager;
+    private readonly ILogger<LibraryOrganiser> _loggerOrganiser;
+    private readonly ILogger<ItemHandler> _loggerItemHandler;
+    private readonly ILogger<LibraryCleaner> _loggerCleaner;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShowOrganiserTask"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
     /// <param name="loggerOrganiser">Instance of the <see cref="ILogger{ShowOrganiserTask}"/> interface.</param>
+    /// <param name="loggerItemHandler">Instance of the <see cref="ItemHandler"/>.</param>
     /// <param name="loggerCleaner">Instance of the <see cref="ILogger{LibraryCleaner}"/> interface.</param>
     public ShowOrganiserTask(
         ILibraryManager libraryManager,
         ILogger<LibraryOrganiser> loggerOrganiser,
+        ILogger<ItemHandler> loggerItemHandler,
         ILogger<LibraryCleaner> loggerCleaner)
     {
-        _libraryOrganiser = new LibraryOrganiser(libraryManager, loggerOrganiser);
-        _libraryCleaner = new LibraryCleaner(libraryManager, loggerCleaner);
+        _libraryManager = libraryManager;
+        _loggerOrganiser = loggerOrganiser;
+        _loggerItemHandler = loggerItemHandler;
+        _loggerCleaner = loggerCleaner;
     }
 
     /// <inheritdoc />
@@ -48,10 +54,11 @@ public class ShowOrganiserTask : AutoOrganiserTask
         ArgumentNullException.ThrowIfNull(AutoOrganiserPlugin.Instance?.Configuration);
 
         var dryRun = AutoOrganiserPlugin.Instance.Configuration.DryRun;
+        var overwrite = AutoOrganiserPlugin.Instance.Configuration.Overwrite;
         var cleanIgnoreExtensions = AutoOrganiserPlugin.Instance.Configuration.CleanIgnoreExtensions
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(x => x.TrimStart('.').ToLowerInvariant())
-            .ToList();
+            .ToArray();
 
         var addLabelResolution = AutoOrganiserPlugin.Instance.Configuration.LabelResolution;
         var addLabelCodec = AutoOrganiserPlugin.Instance.Configuration.LabelCodec;
@@ -60,14 +67,17 @@ public class ShowOrganiserTask : AutoOrganiserTask
 
         var addEpisodeName = AutoOrganiserPlugin.Instance.Configuration.EpisodeName;
 
-        var progressHandler = new ProgressHandler(progress, 5, 95);
-        var labelGenerator = new LabelGenerator(
+        var labelFormatter = new LabelFormatter(
             addLabelResolution, addLabelCodec, addLabelBitDepth, addLabelDynamicRange);
-        var nameGenerator = new FileNameGenerator(labelGenerator, addEpisodeName);
-        var pathGenerator = new FilePathGenerator();
+        var pathFormatter = new FilePathFormatter(labelFormatter, addEpisodeName);
+        var itemHandler = new ItemHandler(pathFormatter, dryRun, overwrite, _loggerItemHandler);
+        var progressHandler = new ProgressHandler(progress, 5, 95);
 
-        _libraryOrganiser.Organise(nameGenerator, pathGenerator, dryRun, progressHandler, cancellationToken);
-        _libraryCleaner.CleanLibrary(CollectionTypeOptions.tvshows, cleanIgnoreExtensions, dryRun);
+        var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
+        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
+
+        libraryOrganiser.Organise(progressHandler, cancellationToken);
+        libraryCleaner.CleanLibrary(CollectionTypeOptions.tvshows, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);
         return Task.CompletedTask;

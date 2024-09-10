@@ -3,38 +3,47 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Jellyfin.Data.Enums;
-using Jellyfin.Plugin.AutoOrganiser.Core.Generators;
+using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using MediaBrowser.Controller.Entities.Movies;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 
 /// <inheritdoc />
-public class FilePathGenerator : IFilePathGenerator<Movie, FileNameGenerator>
+public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
 {
     private readonly bool _forceSubFolder;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FilePathGenerator"/> class.
-    /// </summary>
+    /// <inheritdoc cref="FilePathFormatter{Movie,BoxSet}(LabelFormatter)" />
+    /// <param name="labelFormatter">The object which handles label formatting for the item.</param>
     /// <param name="forceSubFolder">Whether to always place the movie within a subfolder even when it has no extra files.</param>
-    public FilePathGenerator(bool forceSubFolder)
+    public FilePathFormatter(LabelFormatter labelFormatter, bool forceSubFolder) : base(labelFormatter)
     {
         _forceSubFolder = forceSubFolder;
     }
 
     /// <inheritdoc />
-    public string GeneratePath(Movie item, FileNameGenerator nameGenerator)
+    public override string Format(Movie item) => Path.Combine(item.GetTopParent().Path, GetStemPath(item));
+
+    /// <inheritdoc />
+    public override string Format(BoxSet item)
     {
         var parentPath = item.GetTopParent().Path;
-        return Path.Combine(parentPath, GetBasePath(item, nameGenerator));
+        var boxSetName = SanitiseValue(item.Name);
+        boxSetName = AppendYear(item, boxSetName);
+
+        return Path.Combine(parentPath, boxSetName);
     }
 
-    private string GetBasePath(Movie item, FileNameGenerator nameGenerator)
+    private string GetStemPath(Movie item)
     {
         var parentPath = string.Empty;
-        parentPath = AppendSubFolder(item, parentPath, nameGenerator);
+        parentPath = AppendSubFolder(item, parentPath);
 
-        var fileName = nameGenerator.GetFileName(item);
+        var fileName = SanitiseValue(item.Name);
+        fileName = AppendYear(item, fileName);
+        fileName = LabelFormatter.AppendLabel(item, fileName);
+        fileName = AppendExtension(item, fileName);
+
         return Path.Combine(parentPath, fileName);
     }
 
@@ -42,28 +51,26 @@ public class FilePathGenerator : IFilePathGenerator<Movie, FileNameGenerator>
     /// Generates movie file paths from movies within a box set.
     /// </summary>
     /// <param name="boxSet">The box set to generate paths from.</param>
-    /// <param name="nameGenerator">The generator to use to generate a movie's file name.</param>
     /// <returns>The new paths for the items in the box set.</returns>
-    public IEnumerable<Tuple<Movie, string>> GetPathsFromBoxSet(BoxSet boxSet, FileNameGenerator nameGenerator)
+    public IEnumerable<Tuple<Movie, string>> GetPathsFromBoxSet(BoxSet boxSet)
     {
-        var boxSetName = nameGenerator.SanitiseValue(boxSet.Name);
-        boxSetName = nameGenerator.AppendYear(boxSet, boxSetName);
+        var boxSetName = new DirectoryInfo(Format(boxSet)).Name!;
 
         var paths = boxSet.GetRecursiveChildren()
             .Where(i => i.GetBaseItemKind() == BaseItemKind.Movie && Path.Exists(i.Path))
             .Where(i => i.GetTopParent() is not null)
             .OfType<Movie>()
             .Select(movie => new Tuple<Movie, string>(
-                movie, Path.Combine(movie.GetTopParent().Path, boxSetName, GetBasePath(movie, nameGenerator))));
+                movie, Path.Combine(movie.GetTopParent().Path, boxSetName, GetStemPath(movie))));
 
         return paths;
     }
 
-    private string AppendSubFolder(Movie movie, string path, FileNameGenerator nameGenerator)
+    private string AppendSubFolder(Movie movie, string path)
     {
         if (_forceSubFolder || movie.ExtraIds.Length > 0)
         {
-            var folderName = nameGenerator.SanitiseValue(movie.Name);
+            var folderName = SanitiseValue(movie.Name);
 
             var year = movie.PremiereDate?.Year;
             if (year is not null)

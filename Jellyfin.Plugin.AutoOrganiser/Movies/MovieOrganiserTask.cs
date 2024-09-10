@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.AutoOrganiser.Core;
-using Jellyfin.Plugin.AutoOrganiser.Core.Generators;
+using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using Jellyfin.Plugin.AutoOrganiser.Core.Library;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
@@ -14,22 +14,28 @@ namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 /// <inheritdoc />
 public class MovieOrganiserTask : AutoOrganiserTask
 {
-    private readonly LibraryOrganiser _libraryOrganiser;
-    private readonly LibraryCleaner _libraryCleaner;
+    private readonly ILibraryManager _libraryManager;
+    private readonly ILogger<LibraryOrganiser> _loggerOrganiser;
+    private readonly ILogger<ItemHandler> _loggerItemHandler;
+    private readonly ILogger<LibraryCleaner> _loggerCleaner;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MovieOrganiserTask"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="loggerOrganiser">Instance of the <see cref="ILogger{LibraryOrganiser}"/> interface.</param>
+    /// <param name="loggerOrganiser">Instance of the <see cref="ILogger{ShowOrganiserTask}"/> interface.</param>
+    /// <param name="loggerItemHandler">Instance of the <see cref="ItemHandler"/>.</param>
     /// <param name="loggerCleaner">Instance of the <see cref="ILogger{LibraryCleaner}"/> interface.</param>
     public MovieOrganiserTask(
         ILibraryManager libraryManager,
         ILogger<LibraryOrganiser> loggerOrganiser,
+        ILogger<ItemHandler> loggerItemHandler,
         ILogger<LibraryCleaner> loggerCleaner)
     {
-        _libraryOrganiser = new LibraryOrganiser(libraryManager, loggerOrganiser);
-        _libraryCleaner = new LibraryCleaner(libraryManager, loggerCleaner);
+        _libraryManager = libraryManager;
+        _loggerOrganiser = loggerOrganiser;
+        _loggerItemHandler = loggerItemHandler;
+        _loggerCleaner = loggerCleaner;
     }
 
     /// <inheritdoc />
@@ -48,10 +54,11 @@ public class MovieOrganiserTask : AutoOrganiserTask
         progress.Report(0);
 
         var dryRun = AutoOrganiserPlugin.Instance.Configuration.DryRun;
+        var overwrite = AutoOrganiserPlugin.Instance.Configuration.Overwrite;
         var cleanIgnoreExtensions = AutoOrganiserPlugin.Instance.Configuration.CleanIgnoreExtensions
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(x => x.TrimStart('.').ToLowerInvariant())
-            .ToList();
+            .ToArray();
 
         var addLabelResolution = AutoOrganiserPlugin.Instance.Configuration.LabelResolution;
         var addLabelCodec = AutoOrganiserPlugin.Instance.Configuration.LabelCodec;
@@ -60,14 +67,17 @@ public class MovieOrganiserTask : AutoOrganiserTask
 
         var forceSubFolder = AutoOrganiserPlugin.Instance.Configuration.ForceSubFolder;
 
-        var progressHandler = new ProgressHandler(progress, 5, 95);
-        var labelGenerator = new LabelGenerator(
+        var labelGenerator = new LabelFormatter(
             addLabelResolution, addLabelCodec, addLabelBitDepth, addLabelDynamicRange);
-        var nameGenerator = new FileNameGenerator(labelGenerator);
-        var pathGenerator = new FilePathGenerator(forceSubFolder);
+        var pathGenerator = new FilePathFormatter(labelGenerator, forceSubFolder);
+        var itemHandler = new ItemHandler(pathGenerator, dryRun, overwrite, _loggerItemHandler);
+        var progressHandler = new ProgressHandler(progress, 5, 95);
 
-        _libraryOrganiser.Organise(nameGenerator, pathGenerator, dryRun, progressHandler, cancellationToken);
-        _libraryCleaner.CleanLibrary(CollectionTypeOptions.movies, cleanIgnoreExtensions, dryRun);
+        var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
+        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
+
+        libraryOrganiser.Organise(progressHandler, cancellationToken);
+        libraryCleaner.CleanLibrary(CollectionTypeOptions.movies, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);
         return Task.CompletedTask;

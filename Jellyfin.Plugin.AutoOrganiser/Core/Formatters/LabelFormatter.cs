@@ -2,12 +2,12 @@ using J2N.Collections.Generic;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
-namespace Jellyfin.Plugin.AutoOrganiser.Core.Generators;
+namespace Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 
 /// <summary>
-/// Handles label generation for use in a file name for an item.
+/// Handles label formatting for use in a file name for an item.
 /// </summary>
-public class LabelGenerator
+public class LabelFormatter : IFormatter<Video>
 {
     private readonly bool _addLabelResolution;
     private readonly bool _addLabelCodec;
@@ -15,13 +15,13 @@ public class LabelGenerator
     private readonly bool _addLabelDynamicRange;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LabelGenerator"/> class.
+    /// Initializes a new instance of the <see cref="LabelFormatter"/> class.
     /// </summary>
     /// <param name="addLabelResolution">Whether to add the video resolution as part of the file name's label.</param>
     /// <param name="addLabelCodec">Whether to add the video codec as part of the file name's label.</param>
     /// <param name="addLabelBitDepth">Whether to add the video bit depth as part of the file name's label.</param>
     /// <param name="addLabelDynamicRange">Whether to add the video dynamic range as part of the file name's label.</param>
-    public LabelGenerator(
+    public LabelFormatter(
         bool addLabelResolution,
         bool addLabelCodec,
         bool addLabelBitDepth,
@@ -90,28 +90,11 @@ public class LabelGenerator
     private Dictionary<int, int> WidthHeightMap16X9 { get; }
 
     /// <summary>
-    /// Adds a label as a suffix to the given file name for a given item.
+    /// Format a label for a given item.
     /// </summary>
-    /// <param name="item">The item to generate a label for.</param>
-    /// <param name="fileName">The file name to enrich.</param>
-    /// <returns>The enriched file name.</returns>
-    public string AppendLabel(BaseItem item, string fileName)
-    {
-        var label = GetLabel(item);
-        if (label is not null)
-        {
-            fileName += $" - [{label}]";
-        }
-
-        return fileName;
-    }
-
-    /// <summary>
-    /// Generate a label for a given item.
-    /// </summary>
-    /// <param name="item">The item to generate a label for.</param>
-    /// <returns>The generated label.</returns>
-    public string? GetLabel(BaseItem item)
+    /// <param name="item">The item to format a label for.</param>
+    /// <returns>The formatted label.</returns>
+    public string Format(Video item)
     {
         var labelParts = new List<string>();
         if (_addLabelResolution)
@@ -146,14 +129,28 @@ public class LabelGenerator
             }
         }
 
-        return labelParts.Count > 0 ? string.Join(' ', labelParts) : null;
+        return string.Join(' ', labelParts);
     }
 
-    private static MediaStream? GetVideoStream(BaseItem item)
+    /// <summary>
+    /// Adds a label as a suffix to the given file name for a given item.
+    /// </summary>
+    /// <param name="item">The item to format a label for.</param>
+    /// <param name="fileName">The file name to enrich.</param>
+    /// <returns>The enriched file name.</returns>
+    public string AppendLabel(Video item, string fileName)
     {
-        return item.GetMediaStreams()
-            .Find(stream => stream.Type == MediaStreamType.Video);
+        var label = Format(item);
+        if (label.Length > 0)
+        {
+            fileName += $" - [{label}]";
+        }
+
+        return fileName;
     }
+
+    private static MediaStream? GetVideoStream(BaseItem item) => item
+        .GetMediaStreams().Find(stream => stream.Type == MediaStreamType.Video);
 
     private string GetResolution(BaseItem item)
     {
@@ -182,10 +179,7 @@ public class LabelGenerator
         return height;
     }
 
-    private static string? GetCodec(BaseItem item)
-    {
-        return GetVideoStream(item)?.Codec.ToUpperInvariant();
-    }
+    private static string? GetCodec(BaseItem item) => GetVideoStream(item)?.Codec.ToUpperInvariant();
 
     private static string? GetBitDepth(BaseItem item)
     {
@@ -193,9 +187,5 @@ public class LabelGenerator
         return stream is not null ? $"{stream.BitDepth}bit" : null;
     }
 
-    private static string? GetDynamicRange(BaseItem item)
-    {
-        var stream = GetVideoStream(item);
-        return stream?.VideoRange.ToString();
-    }
+    private static string? GetDynamicRange(BaseItem item) => GetVideoStream(item)?.VideoRange.ToString();
 }

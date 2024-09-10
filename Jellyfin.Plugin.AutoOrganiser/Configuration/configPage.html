@@ -27,6 +27,17 @@
                             </div>
                         </div>
 
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="overwrite" />
+                                <span>Overwrite files</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">
+                                Checking this overwrite any files that exist at the new path when moving files/directories.
+                                Unchecking this always skips these files leaving them in their original location.
+                            </div>
+                        </div>
+
                         <div class="sectionTitleContainer flex align-items-center">
                             <h2 class="sectionTitle">Movies settings</h2>
                         </div>
@@ -137,6 +148,7 @@
                     
                     ApiClient.getPluginConfiguration(AutoOrganiserPluginConfig.pluginUniqueId).then(function (config) {
                         document.getElementById('dryRun').checked = config.DryRun;
+                        document.getElementById('overwrite').checked = config.Overwrite;
                         document.getElementById('cleanIgnoreExtensions').value = config.CleanIgnoreExtensions;
                         
                         document.getElementById('showsEpisodeName').checked = config.EpisodeName;
@@ -156,6 +168,7 @@
 
                     ApiClient.getPluginConfiguration(AutoOrganiserPluginConfig.pluginUniqueId).then(function (config) {
                         config.DryRun = document.getElementById('dryRun').checked;
+                        config.Overwrite = document.getElementById('overwrite').checked;
                         config.CleanIgnoreExtensions = document.getElementById('cleanIgnoreExtensions').value;
                         
                         config.EpisodeName = document.getElementById('showsEpisodeName').checked;

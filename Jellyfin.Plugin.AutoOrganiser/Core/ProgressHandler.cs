@@ -47,16 +47,10 @@ public class ProgressHandler
     /// <summary>
     /// Sets the progress to the initial value.
     /// </summary>
-    public void SetProgressToInitial()
-    {
-        _progress.Report(_initial);
-    }
+    public void SetProgressToInitial() => _progress.Report(_initial);
 
     /// <summary>
     /// Sets the progress to the initial value.
     /// </summary>
-    public void SetProgressToFinal()
-    {
-        _progress.Report(_final);
-    }
+    public void SetProgressToFinal() => _progress.Report(_final);
 }

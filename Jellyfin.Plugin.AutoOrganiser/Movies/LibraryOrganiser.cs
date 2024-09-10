@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.AutoOrganiser.Core;
-using Jellyfin.Plugin.AutoOrganiser.Core.Library;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Library;
@@ -14,19 +13,45 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 
-/// <inheritdoc />
-public class LibraryOrganiser : LibraryOrganiser<Movie, FileNameGenerator, FilePathGenerator>
+/// <summary>
+/// Handles organising items within a given library.
+/// </summary>
+public class LibraryOrganiser
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LibraryOrganiser"/> class.
+    /// </summary>
+    /// <param name="itemHandler">Instance of the <see cref="ItemHandler"/>.</param>
+    /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
+    /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
     public LibraryOrganiser(
+        ItemHandler itemHandler,
         ILibraryManager libraryManager,
-        ILogger<ILibraryOrganiser<Movie, FileNameGenerator, FilePathGenerator>> logger) : base(libraryManager, logger)
+        ILogger<LibraryOrganiser> logger)
     {
+        ItemHandler = itemHandler;
+
+        LibraryManager = libraryManager;
+        Logger = logger;
     }
 
-    private IEnumerable<Movie> GetMoviesFromLibrary(IEnumerable<Guid>? excludeItemIds = null)
-    {
-        var movies = LibraryManager.GetItemList(new InternalItemsQuery
+    /// <summary>
+    /// Gets the instance of the <see cref="ItemHandler"/>.
+    /// </summary>
+    private ItemHandler ItemHandler { get; }
+
+    /// <summary>
+    /// Gets the library manager.
+    /// </summary>
+    private ILibraryManager LibraryManager { get; }
+
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
+    private ILogger<LibraryOrganiser> Logger { get; }
+
+    private IEnumerable<Movie> GetMoviesFromLibrary(IEnumerable<Guid>? excludeItemIds = null) => LibraryManager
+        .GetItemList(new InternalItemsQuery
         {
             IncludeItemTypes = [BaseItemKind.Movie],
             IsVirtualItem = false,
@@ -38,12 +63,8 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileNameGenerator, FileP
             ExcludeItemIds = excludeItemIds?.ToArray() ?? []
         }).OfType<Movie>().Where(movie => File.Exists(movie.Path));
 
-        return movies;
-    }
-
-    private IEnumerable<BoxSet> GetBoxSetsFromLibrary()
-    {
-        var movies = LibraryManager.GetItemList(new InternalItemsQuery
+    private IEnumerable<BoxSet> GetBoxSetsFromLibrary() => LibraryManager
+        .GetItemList(new InternalItemsQuery
         {
             IncludeItemTypes = [BaseItemKind.BoxSet],
             OrderBy = new List<(ItemSortBy, SortOrder)>
@@ -53,64 +74,53 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileNameGenerator, FileP
             Recursive = true
         }).OfType<BoxSet>();
 
-        return movies;
-    }
-
-    /// <inheritdoc />
-    public override async void Organise(
-        FileNameGenerator nameGenerator,
-        FilePathGenerator pathGenerator,
-        bool dryRun,
+    /// <summary>
+    /// Organises all items in the current library by moving the files to new paths based on the given formatters.
+    /// </summary>
+    /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
+    /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
+    public void Organise(
         ProgressHandler progressHandler,
         CancellationToken cancellationToken)
     {
         // Get combined list of box sets and movies
         // Filter out movies in box sets from all available movies
-        var boxSets = GetBoxSetsFromLibrary().ToList();
+        var boxSets = GetBoxSetsFromLibrary().ToArray();
         var boxSetMovieIds = boxSets
             .SelectMany(boxSet => boxSet
                 .GetRecursiveChildren()
                 .Where(item => item.GetBaseItemKind() == BaseItemKind.Movie)
                 .Select(item => item.Id));
         var items = GetMoviesFromLibrary(boxSetMovieIds)
-            .OfType<BaseItem>().Concat(boxSets).ToList();
+            .OfType<BaseItem>().Concat(boxSets).ToArray();
 
-        Logger.LogInformation("Found {N} movies/box sets to organise", items.Count);
+        Logger.LogInformation("Found {N} movies/box sets to organise", items.Length);
         progressHandler.SetProgressToInitial();
 
         var tasks = items
-            .Select((task, idx) => progressHandler.Progress(idx, items.Count, task))
-            .SelectMany(movie => OrganiseItem(movie, nameGenerator, pathGenerator, dryRun, cancellationToken))
+            .Select((task, idx) => progressHandler.Progress(idx, items.Length, task))
+            .SelectMany(movie => OrganiseItem(movie, cancellationToken))
             .Where(task => task is not null)
             .OfType<Task>()
-            .ToList();
+            .ToArray();
 
         progressHandler.SetProgressToFinal();
-
-        var logPrefix = dryRun ? "DRY RUN | Updating" : "Updating";
-        Logger.LogInformation("{Prefix:l} metadata on {N} moved items", logPrefix, tasks.Count);
-        await Task.WhenAll(tasks).ConfigureAwait(false);
+        ItemHandler.RunUpdateMetadataTasks(tasks);
     }
 
-    private IEnumerable<Task?> OrganiseItem(
-        BaseItem item,
-        FileNameGenerator nameGenerator,
-        FilePathGenerator pathGenerator,
-        bool dryRun,
-        CancellationToken cancellationToken)
+    private IEnumerable<Task?> OrganiseItem(BaseItem item, CancellationToken cancellationToken) => item switch
     {
-        if (item is BoxSet boxSet)
-        {
-            return pathGenerator.GetPathsFromBoxSet(boxSet, nameGenerator)
-                .Select(pair => MoveItem(pair.Item1, pair.Item2, dryRun, cancellationToken));
-        }
+        BoxSet boxSet =>
+            ItemHandler.PathFormatter
+                .GetPathsFromBoxSet(boxSet)
+                .Select(pair => ItemHandler.MoveItem(pair.Item1, pair.Item2, cancellationToken)),
+        Movie movie =>
+            Enumerable.Empty<Task?>()
+                .Concat([ItemHandler.MoveItem(movie, ItemHandler.PathFormatter.Format(movie), cancellationToken)])
+                .Concat(OrganiseExtras(movie, cancellationToken)),
+        _ => []
+    };
 
-        if (item is Movie movie)
-        {
-            var newPath = pathGenerator.GeneratePath(movie, nameGenerator);
-            return [MoveItem(movie, newPath, dryRun, cancellationToken)];
-        }
-
-        return [];
-    }
+    private IEnumerable<Task?> OrganiseExtras(Movie movie, CancellationToken cancellationToken) => ItemHandler
+        .MoveExtras(movie.GetExtras().ToArray(), cancellationToken);
 }

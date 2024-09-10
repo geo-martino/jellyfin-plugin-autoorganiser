@@ -8,63 +8,47 @@ namespace Jellyfin.Plugin.AutoOrganiser.Configuration;
 public class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
-    /// </summary>
-    public PluginConfiguration()
-    {
-        DryRun = false;
-
-        CleanIgnoreExtensions = string.Empty;
-
-        LabelResolution = false;
-        LabelCodec = false;
-        LabelBitDepth = false;
-        LabelDynamicRange = false;
-
-        // Movies config
-        ForceSubFolder = false;
-
-        // Shows config
-        EpisodeName = true;
-    }
-
-    /// <summary>
     /// Gets or sets a value indicating whether to execute as a dry run.
     /// </summary>
-    public bool DryRun { get; set; }
+    public bool DryRun { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to overwrite any files that exist at the new path when moving files/directories.
+    /// </summary>
+    public bool Overwrite { get; set; } = false;
 
     /// <summary>
     /// Gets or sets the extensions to ignore when removing empty directories in a library.
     /// </summary>
-    public string CleanIgnoreExtensions { get; set; }
+    public string CleanIgnoreExtensions { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video resolution on the file name's label.
     /// </summary>
-    public bool LabelResolution { get; set; }
+    public bool LabelResolution { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video codec on the file name's label.
     /// </summary>
-    public bool LabelCodec { get; set; }
+    public bool LabelCodec { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video bit depth on the file name's label.
     /// </summary>
-    public bool LabelBitDepth { get; set; }
+    public bool LabelBitDepth { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video range on the file name's label.
     /// </summary>
-    public bool LabelDynamicRange { get; set; }
+    public bool LabelDynamicRange { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether to always put movie files in sub-folder.
     /// </summary>
-    public bool ForceSubFolder { get; set; }
+    public bool ForceSubFolder { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the episode name to the file name.
     /// </summary>
-    public bool EpisodeName { get; set; }
+    public bool EpisodeName { get; set; } = true;
 }
