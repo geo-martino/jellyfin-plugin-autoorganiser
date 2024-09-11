@@ -29,7 +29,6 @@ public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
     {
         var parentPath = item.GetTopParent().Path;
         var boxSetName = SanitiseValue(item.Name);
-        boxSetName = AppendYear(item, boxSetName);
 
         return Path.Combine(parentPath, boxSetName);
     }

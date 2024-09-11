@@ -67,7 +67,8 @@ public class LibraryOrganiser
     /// </summary>
     /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
-    public void Organise(ProgressHandler progressHandler, CancellationToken cancellationToken)
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task Organise(ProgressHandler progressHandler, CancellationToken cancellationToken)
     {
         var shows = GetShowsFromLibrary().ToArray();
         Logger.LogInformation("Found {N} shows to organise", shows.Length);
@@ -81,7 +82,7 @@ public class LibraryOrganiser
             .ToArray();
 
         progressHandler.SetProgressToFinal();
-        ItemHandler.RunUpdateMetadataTasks(tasks);
+        await ItemHandler.RunUpdateMetadataTasks(tasks).ConfigureAwait(false);
     }
 
     private IEnumerable<Task?> OrganiseFolder(Folder folder, CancellationToken cancellationToken)

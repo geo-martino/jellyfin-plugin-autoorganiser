@@ -48,7 +48,7 @@ public class ShowOrganiserTask : AutoOrganiserTask
     public override string Description => "Organises and renames show files according to recommended structure.";
 
     /// <inheritdoc />
-    public override Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public override async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         progress.Report(0);
         ArgumentNullException.ThrowIfNull(AutoOrganiserPlugin.Instance?.Configuration);
@@ -76,10 +76,9 @@ public class ShowOrganiserTask : AutoOrganiserTask
         var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
         var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
 
-        libraryOrganiser.Organise(progressHandler, cancellationToken);
+        await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
         libraryCleaner.CleanLibrary(CollectionTypeOptions.tvshows, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);
-        return Task.CompletedTask;
     }
 }

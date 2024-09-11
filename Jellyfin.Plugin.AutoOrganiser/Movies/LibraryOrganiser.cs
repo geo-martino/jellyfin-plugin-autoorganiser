@@ -79,7 +79,8 @@ public class LibraryOrganiser
     /// </summary>
     /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
-    public void Organise(
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task Organise(
         ProgressHandler progressHandler,
         CancellationToken cancellationToken)
     {
@@ -105,7 +106,7 @@ public class LibraryOrganiser
             .ToArray();
 
         progressHandler.SetProgressToFinal();
-        ItemHandler.RunUpdateMetadataTasks(tasks);
+        await ItemHandler.RunUpdateMetadataTasks(tasks).ConfigureAwait(false);
     }
 
     private IEnumerable<Task?> OrganiseItem(BaseItem item, CancellationToken cancellationToken) => item switch
@@ -113,7 +114,8 @@ public class LibraryOrganiser
         BoxSet boxSet =>
             ItemHandler.PathFormatter
                 .GetPathsFromBoxSet(boxSet)
-                .Select(pair => ItemHandler.MoveItem(pair.Item1, pair.Item2, cancellationToken)),
+                .Select(pair => ItemHandler.MoveItem(pair.Item1, pair.Item2, cancellationToken))
+                .Concat([ItemHandler.MoveItem(boxSet, ItemHandler.PathFormatter.Format(boxSet), cancellationToken)]),
         Movie movie =>
             Enumerable.Empty<Task?>()
                 .Concat([ItemHandler.MoveItem(movie, ItemHandler.PathFormatter.Format(movie), cancellationToken)])

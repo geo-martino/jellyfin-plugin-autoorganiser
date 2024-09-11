@@ -48,7 +48,7 @@ public class MovieOrganiserTask : AutoOrganiserTask
     public override string Description => "Organises and renames movie files according to recommended structure.";
 
     /// <inheritdoc />
-    public override Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public override async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(AutoOrganiserPlugin.Instance?.Configuration);
         progress.Report(0);
@@ -76,10 +76,9 @@ public class MovieOrganiserTask : AutoOrganiserTask
         var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
         var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
 
-        libraryOrganiser.Organise(progressHandler, cancellationToken);
+        await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
         libraryCleaner.CleanLibrary(CollectionTypeOptions.movies, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);
-        return Task.CompletedTask;
     }
 }

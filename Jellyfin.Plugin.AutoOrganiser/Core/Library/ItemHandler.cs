@@ -332,7 +332,8 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// Log and run the given 'update metadata' tasks.
     /// </summary>
     /// <param name="tasks">The tasks to run.</param>
-    public async void RunUpdateMetadataTasks(Task[] tasks)
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task RunUpdateMetadataTasks(Task[] tasks)
     {
         if (tasks is { Length: 0 })
         {
