@@ -55,10 +55,8 @@ public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
     {
         var boxSetName = new DirectoryInfo(Format(boxSet)).Name!;
 
-        var paths = boxSet.GetRecursiveChildren()
-            .Where(i => i.GetBaseItemKind() == BaseItemKind.Movie && Path.Exists(i.Path))
-            .Where(i => i.GetTopParent() is not null)
-            .OfType<Movie>()
+        var paths = boxSet.Children
+            .OfType<Movie>().Where(i => i.GetTopParent() is not null)
             .Select(movie => new Tuple<Movie, string>(
                 movie, Path.Combine(movie.GetTopParent().Path, boxSetName, GetStemPath(movie))));
 

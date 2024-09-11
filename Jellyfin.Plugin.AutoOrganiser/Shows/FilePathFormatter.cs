@@ -68,48 +68,24 @@ public class FilePathFormatter : FilePathFormatter<Episode, Season>
             episode.Season is not null ? GetSeasonIndex(episode.Season) : GetSeasonIndex(episode),
             GetEpisodeIndex(episode));
 
-    private string GetSeasonIndex(Season season)
+    private string GetSeasonIndex(Season season) =>
+        PadIndexNumber(season.IndexNumber, season.Series.Children.OfType<Season>());
+
+    private string GetSeasonIndex(Episode episode) =>
+        PadIndexNumber(episode.ParentIndexNumber, episode.Series.Children.OfType<Season>());
+
+    private string GetEpisodeIndex(Episode episode) => episode.Season switch
     {
-        var seriesSeasons = season.Series
-            .GetRecursiveChildren()
-            .Where(item => item.GetBaseItemKind() == BaseItemKind.Season);
+        null => PadIndexNumber(episode.IndexNumber),
+        _ => PadIndexNumber(episode.IndexNumber, episode.Season.Children.OfType<Episode>())
+    };
 
-        return PadIndexNumber(season.IndexNumber, seriesSeasons);
-    }
-
-    private string GetSeasonIndex(Episode episode)
-    {
-        var seriesSeasons = episode.Series
-            .GetRecursiveChildren()
-            .Where(item => item.GetBaseItemKind() == BaseItemKind.Season);
-
-        return PadIndexNumber(episode.ParentIndexNumber, seriesSeasons);
-    }
-
-    private string GetEpisodeIndex(Episode episode)
-    {
-        var episodes = episode.Season
-            .GetRecursiveChildren()
-            .Where(item => item.GetBaseItemKind() == BaseItemKind.Episode).ToArray();
-
-        if (episodes.Length == 0)
-        {
-            episodes = episode.Series
-                .GetRecursiveChildren()
-                .Where(item => item.GetBaseItemKind() == BaseItemKind.Episode).ToArray();
-        }
-
-        var episodeIndex = PadIndexNumber(episode.IndexNumber, episodes);
-
-        return episodeIndex;
-    }
-
-    private string PadIndexNumber(int? index, IEnumerable<BaseItem> items)
+    private string PadIndexNumber(int? index, IEnumerable<BaseItem>? items = null)
     {
         var padMin = 2;
         var indexNumber = index ?? 0;
 
-        var pad = items.DefaultIfEmpty()
+        var pad = (items ?? []).DefaultIfEmpty()
             .Max(item => item?.IndexNumber ?? indexNumber)
             .ToString(CultureInfo.InvariantCulture).Length;
         var indexPadded = indexNumber

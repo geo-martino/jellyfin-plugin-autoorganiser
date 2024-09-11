@@ -80,7 +80,7 @@ public class LibraryOrganiser
     /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task Organise(
+    public Task Organise(
         ProgressHandler progressHandler,
         CancellationToken cancellationToken)
     {
@@ -88,10 +88,8 @@ public class LibraryOrganiser
         // Filter out movies in box sets from all available movies
         var boxSets = GetBoxSetsFromLibrary().ToArray();
         var boxSetMovieIds = boxSets
-            .SelectMany(boxSet => boxSet
-                .GetRecursiveChildren()
-                .Where(item => item.GetBaseItemKind() == BaseItemKind.Movie)
-                .Select(item => item.Id));
+            .SelectMany(boxSet => boxSet.GetRecursiveChildren().OfType<Movie>())
+            .Select(item => item.Id);
         var items = GetMoviesFromLibrary(boxSetMovieIds)
             .OfType<BaseItem>().Concat(boxSets).ToArray();
 
@@ -100,29 +98,24 @@ public class LibraryOrganiser
 
         var tasks = items
             .Select((task, idx) => progressHandler.Progress(idx, items.Length, task))
-            .SelectMany(movie => OrganiseItem(movie, cancellationToken))
-            .Where(task => task is not null)
-            .OfType<Task>()
-            .ToArray();
+            .SelectMany(movie => OrganiseItem(movie, cancellationToken));
 
-        progressHandler.SetProgressToFinal();
-        await ItemHandler.RunUpdateMetadataTasks(tasks).ConfigureAwait(false);
+        return ItemHandler.RunTasks(tasks);
     }
 
-    private IEnumerable<Task?> OrganiseItem(BaseItem item, CancellationToken cancellationToken) => item switch
+    private IEnumerable<Task<bool>> OrganiseItem(BaseItem item, CancellationToken cancellationToken) => item switch
     {
         BoxSet boxSet =>
             ItemHandler.PathFormatter
                 .GetPathsFromBoxSet(boxSet)
-                .Select(pair => ItemHandler.MoveItem(pair.Item1, pair.Item2, cancellationToken))
-                .Concat([ItemHandler.MoveItem(boxSet, ItemHandler.PathFormatter.Format(boxSet), cancellationToken)]),
+                .Select(pair => ItemHandler.MoveItem(pair.Item1, pair.Item2, cancellationToken)),
         Movie movie =>
-            Enumerable.Empty<Task?>()
-                .Concat([ItemHandler.MoveItem(movie, ItemHandler.PathFormatter.Format(movie), cancellationToken)])
+            Enumerable.Empty<Task<bool>>()
+                .Concat([ItemHandler.MoveItem(movie, ItemHandler.Format(movie), cancellationToken)])
                 .Concat(OrganiseExtras(movie, cancellationToken)),
         _ => []
     };
 
-    private IEnumerable<Task?> OrganiseExtras(Movie movie, CancellationToken cancellationToken) => ItemHandler
+    private IEnumerable<Task<bool>> OrganiseExtras(Movie movie, CancellationToken cancellationToken) => ItemHandler
         .MoveExtras(movie.GetExtras().ToArray(), cancellationToken);
 }

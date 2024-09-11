@@ -77,6 +77,11 @@ public class ShowOrganiserTask : AutoOrganiserTask
         var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
 
         await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
         libraryCleaner.CleanLibrary(CollectionTypeOptions.tvshows, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);

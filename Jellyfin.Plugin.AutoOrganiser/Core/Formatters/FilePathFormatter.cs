@@ -1,6 +1,9 @@
+using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using MediaBrowser.Controller.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 

@@ -72,13 +72,41 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// <summary>
     /// Gets the logger.
     /// </summary>
-    private ILogger<ItemHandler<TItem, TFolder, TPathFormatter>> Logger { get; }
+    protected ILogger<ItemHandler<TItem, TFolder, TPathFormatter>> Logger { get; }
+
+    /// <inheritdoc cref="FilePathFormatter{TItem,TFolder}.Format(TFolder)"/>
+    public string Format(TFolder item)
+    {
+        try
+        {
+            return PathFormatter.Format(item);
+        }
+        catch (Exception)
+        {
+            Logger.LogCritical("Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            throw;
+        }
+    }
+
+    /// <inheritdoc cref="FilePathFormatter{TItem,TFolder}.Format(TItem)"/>
+    public string Format(TItem item)
+    {
+        try
+        {
+            return PathFormatter.Format(item);
+        }
+        catch (Exception)
+        {
+            Logger.LogCritical("Count not format a new path for item: {Name} - {Path}", item.Name, item.Path);
+            throw;
+        }
+    }
 
     private void LogMove(string oldPath, string newPath, string itemKind, bool overwrite)
     {
         var operation = overwrite ? "Overwriting" : "Moving";
         var logPrefix = DryRun ? $"DRY RUN | {operation}" : operation;
-        Logger.LogInformation("{Prefix:l} {Kind:l}:\n\t>> {Old}\n\t<< {New}", logPrefix, itemKind, oldPath, newPath);
+        Logger.LogInformation("{Prefix:l} {Kind:l}:\n\t>> {Old}\n\tto {New}", logPrefix, itemKind, oldPath, newPath);
     }
 
     /// <summary>
@@ -88,11 +116,21 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// <param name="newPath">The path to move the item to.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="Task"/> to be executed to update the path metadata.</returns>
-    public Task? MoveItem(BaseItem item, string newPath, CancellationToken cancellationToken)
+    public async Task<bool> MoveItem(BaseItem item, string newPath, CancellationToken cancellationToken)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
+
         var itemKind = item.GetBaseItemKind().ToString().ToLowerInvariant();
         var moved = MoveItem(item.Path, newPath, itemKind);
-        return moved ? UpdatePathMetadata(item, newPath, cancellationToken) : null;
+        if (moved)
+        {
+            await UpdatePathMetadata(item, newPath, cancellationToken).ConfigureAwait(false);
+        }
+
+        return moved;
     }
 
     private bool MoveItem(string oldPath, string newPath, string itemKind)
@@ -206,30 +244,33 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
             LogMove(oldPath, newPath, itemKind, false);
         }
 
-        if (!File.Exists(newPath))
+        if (File.Exists(newPath))
         {
-            if (DryRun)
+            if (!DryRun)
             {
-                return true;
+                Logger.LogWarning("Cannot not move file. File already exists at path: {Path}", newPath);
             }
 
-            CreateParentDirectory(newPath);
-            try
-            {
-                File.Move(oldPath, newPath);
-                return true;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Logger.LogError("Insufficient permissions to move {OldPath} -> {NewPath}", oldPath, newPath);
-            }
-        }
-        else if (!DryRun)
-        {
-            Logger.LogWarning("Cannot not move file. File already exists at path: {Path}", newPath);
+            return false;
         }
 
-        return false;
+        if (DryRun)
+        {
+            return true;
+        }
+
+        CreateParentDirectory(newPath);
+        try
+        {
+            File.Move(oldPath, newPath);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogError("Insufficient permissions to move {OldPath} -> {NewPath}", oldPath, newPath);
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -239,33 +280,37 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
     /// <param name="parent">The parent item to place the extras into.</param>
     /// <returns>The <see cref="Task"/>s to be executed to update the path metadata.</returns>
-    public IEnumerable<Task?> MoveExtras(
+    public IEnumerable<Task<bool>> MoveExtras(
         IReadOnlyCollection<BaseItem?> extras,
         CancellationToken cancellationToken,
         TFolder? parent = null) => extras
-            .Where(extra => extra is not null && File.Exists(extra.Path))
-            .OfType<BaseItem>()
+            .Where(extra => File.Exists(extra?.Path)).OfType<BaseItem>()
             .Select(extra =>
             {
                 var unique = extras.Count(e => e is not null && e.ExtraType == extra.ExtraType) > 1;
                 return MoveExtra(extra, unique, cancellationToken, parent);
             });
 
-    private Task? MoveExtra(BaseItem extra, bool unique, CancellationToken cancellationToken, TFolder? parent = null)
+    private async Task<bool> MoveExtra(BaseItem extra, bool unique, CancellationToken cancellationToken, TFolder? parent = null)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
+
         string? parentPath = null;
         if (parent != null)
         {
-            parentPath = PathFormatter.Format(parent);
+            parentPath = Format(parent);
         }
         else if (extra is TItem item)
         {
-            parentPath = Path.GetDirectoryName(PathFormatter.Format(item));
+            parentPath = Path.GetDirectoryName(Format(item));
         }
 
         if (parentPath == null)
         {
-            return null;
+            return false;
         }
 
         var itemKind = string.Concat(extra.ExtraType.ToString()!.Select(CharToSnakeCase))
@@ -292,7 +337,12 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
 
         var newPath = Path.Combine(parentPath, fileName);
         var moved = MoveItem(extra.Path, newPath, itemKind);
-        return moved ? UpdatePathMetadata(extra, newPath, cancellationToken) : null;
+        if (moved)
+        {
+            await UpdatePathMetadata(extra, newPath, cancellationToken).ConfigureAwait(false);
+        }
+
+        return moved;
     }
 
     private void CreateParentDirectory(string path)
@@ -313,19 +363,20 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// <param name="item">The item to move.</param>
     /// <param name="newPath">The path to move the item to.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
-    /// <returns>The <see cref="Task"/> to be executed to update the path metadata.</returns>
-    public Task? UpdatePathMetadata(
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task<bool> UpdatePathMetadata(
         BaseItem item,
         string newPath,
         CancellationToken cancellationToken)
     {
         if (DryRun)
         {
-            return Task.CompletedTask;
+            return false;
         }
 
         item.Path = newPath;
-        return item.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken);
+        await item.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken).ConfigureAwait(false);
+        return true;
     }
 
     /// <summary>
@@ -333,16 +384,19 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// </summary>
     /// <param name="tasks">The tasks to run.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task RunUpdateMetadataTasks(Task[] tasks)
+    public async Task RunTasks(IEnumerable<Task<bool>> tasks)
     {
-        if (tasks is { Length: 0 })
+        // var moveCount = (await Task.WhenAll(tasks).ConfigureAwait(false)).Count(result => result);
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+        var moveCount = results.Count(result => result);
+        if (moveCount == 0)
         {
             Logger.LogInformation("No items updated.");
             return;
         }
 
         var logPrefix = DryRun ? "DRY RUN | " : string.Empty;
-        Logger.LogInformation("{Prefix:l}Updating metadata on {N} moved items", logPrefix, tasks.Length);
-        await Task.WhenAll(tasks).ConfigureAwait(false);
+        Logger.LogInformation("{Prefix:l}Moved {N} items", logPrefix, moveCount);
+        Logger.LogInformation(">>>>> Retrieved {N} results", results.Length);
     }
 }

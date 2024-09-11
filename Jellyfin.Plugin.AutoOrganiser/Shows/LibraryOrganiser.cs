@@ -68,7 +68,7 @@ public class LibraryOrganiser
     /// <param name="progressHandler">Instance of the <see cref="ProgressHandler"/>.</param>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task Organise(ProgressHandler progressHandler, CancellationToken cancellationToken)
+    public Task Organise(ProgressHandler progressHandler, CancellationToken cancellationToken)
     {
         var shows = GetShowsFromLibrary().ToArray();
         Logger.LogInformation("Found {N} shows to organise", shows.Length);
@@ -76,16 +76,12 @@ public class LibraryOrganiser
         progressHandler.SetProgressToInitial();
         var tasks = shows
             .Select((series, idx) => progressHandler.Progress(idx, shows.Length, series))
-            .SelectMany(series => OrganiseFolder(series, cancellationToken))
-            .Where(task => task is not null)
-            .OfType<Task>()
-            .ToArray();
+            .SelectMany(series => OrganiseFolder(series, cancellationToken));
 
-        progressHandler.SetProgressToFinal();
-        await ItemHandler.RunUpdateMetadataTasks(tasks).ConfigureAwait(false);
+        return ItemHandler.RunTasks(tasks);
     }
 
-    private IEnumerable<Task?> OrganiseFolder(Folder folder, CancellationToken cancellationToken)
+    private IEnumerable<Task<bool>> OrganiseFolder(Folder folder, CancellationToken cancellationToken)
     {
         var tasks = OrganiseChildren(folder, cancellationToken);
 
@@ -96,8 +92,8 @@ public class LibraryOrganiser
 
         var newPath = folder switch
         {
-            Series series => ItemHandler.PathFormatter.Format(series),
-            Season season => ItemHandler.PathFormatter.Format(season),
+            Series series => ItemHandler.Format(series),
+            Season season => ItemHandler.Format(season),
             _ => null
         };
 
@@ -107,7 +103,7 @@ public class LibraryOrganiser
         }
     }
 
-    private IEnumerable<Task?> OrganiseChildren(Folder folder, CancellationToken cancellationToken) => folder switch
+    private IEnumerable<Task<bool>> OrganiseChildren(Folder folder, CancellationToken cancellationToken) => folder switch
     {
         Series series => OrganiseChildSeasons(series, cancellationToken)
             .Concat(OrganiseChildEpisodes(series, cancellationToken)),
@@ -116,32 +112,30 @@ public class LibraryOrganiser
         _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, "Unrecognized show folder type")
     };
 
-    private IEnumerable<Task?> OrganiseChildSeasons(Folder folder, CancellationToken cancellationToken) => folder
-        .GetRecursiveChildren(item => item.GetBaseItemKind() == BaseItemKind.Season)
-        .OfType<Season>()
-        .Where(season => Directory.Exists(season.Path))
-        .SelectMany(season => OrganiseFolder(season, cancellationToken));
+    private IEnumerable<Task<bool>> OrganiseChildSeasons(Folder folder, CancellationToken cancellationToken) =>
+        folder.Children
+            .OfType<Season>().Where(season => Directory.Exists(season.Path))
+            .SelectMany(season => OrganiseFolder(season, cancellationToken));
 
-    private IEnumerable<Task?> OrganiseChildEpisodes(Folder folder, CancellationToken cancellationToken) => folder
-        .GetRecursiveChildren(item => item.GetBaseItemKind() == BaseItemKind.Episode)
-        .OfType<Episode>()
-        .Where(episode => File.Exists(episode.Path))
-        .Select(episode => OrganiseEpisode(episode, cancellationToken));
+    private IEnumerable<Task<bool>> OrganiseChildEpisodes(Folder folder, CancellationToken cancellationToken) =>
+        folder.Children
+            .OfType<Episode>().Where(item => File.Exists(item.Path))
+            .Select(episode => OrganiseEpisode(episode, cancellationToken));
 
-    private Task? OrganiseEpisode(Episode episode, CancellationToken cancellationToken)
+    private Task<bool> OrganiseEpisode(Episode episode, CancellationToken cancellationToken)
     {
         if (episode.Series is null)
         {
             Logger.LogWarning(
                 "Cannot process episode: it has not been assigned to a series | {Episode} ",
                 episode.Path);
-            return null;
+            return Task.FromResult(false);
         }
 
-        var newEpisodePath = ItemHandler.PathFormatter.Format(episode);
+        var newEpisodePath = ItemHandler.Format(episode);
         return ItemHandler.MoveItem(episode, newEpisodePath, cancellationToken);
     }
 
-    private IEnumerable<Task?> OrganiseExtras(Season season, CancellationToken cancellationToken) => ItemHandler
+    private IEnumerable<Task<bool>> OrganiseExtras(Season season, CancellationToken cancellationToken) => ItemHandler
         .MoveExtras(season.GetExtras().ToArray(), cancellationToken, season);
 }
