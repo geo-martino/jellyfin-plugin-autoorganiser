@@ -106,7 +106,8 @@ public class LibraryOrganiser
     private IEnumerable<Task<bool>> OrganiseChildren(Folder folder, CancellationToken cancellationToken) => folder switch
     {
         Series series => OrganiseChildSeasons(series, cancellationToken)
-            .Concat(OrganiseChildEpisodes(series, cancellationToken)),
+            .Concat(OrganiseChildEpisodes(series, cancellationToken))
+            .Concat(OrganiseExtras(series, cancellationToken)),
         Season season => OrganiseChildEpisodes(season, cancellationToken)
             .Concat(OrganiseExtras(season, cancellationToken)),
         _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, "Unrecognized show folder type")
@@ -136,6 +137,6 @@ public class LibraryOrganiser
         return ItemHandler.MoveItem(episode, newEpisodePath, cancellationToken);
     }
 
-    private IEnumerable<Task<bool>> OrganiseExtras(Season season, CancellationToken cancellationToken) => ItemHandler
-        .MoveExtras(season.GetExtras().ToArray(), cancellationToken, season);
+    private IEnumerable<Task<bool>> OrganiseExtras(Folder folder, CancellationToken cancellationToken) => ItemHandler
+        .MoveExtras(folder.GetExtras().ToArray(), cancellationToken, folder);
 }

@@ -1,9 +1,6 @@
-using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using MediaBrowser.Controller.Entities;
-using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 
@@ -11,13 +8,11 @@ namespace Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 /// Handles fil path formatting for an item.
 /// </summary>
 /// <typeparam name="TItem">The <see cref="BaseItem"/> type that this formatter can process.</typeparam>
-/// <typeparam name="TFolder">The <see cref="Folder"/> type that can contain many <typeparamref name="TItem"/> types.</typeparam>
-public abstract class FilePathFormatter<TItem, TFolder> : IFormatter<TItem>
+public abstract class FilePathFormatter<TItem> : IFormatter<TItem>
     where TItem : BaseItem
-    where TFolder : Folder
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="FilePathFormatter{TItem,TFolder}"/> class.
+    /// Initializes a new instance of the <see cref="FilePathFormatter{TItem}"/> class.
     /// </summary>
     /// <param name="labelFormatter">The object which handles label formatting for the item.</param>
     protected FilePathFormatter(LabelFormatter labelFormatter)
@@ -40,9 +35,9 @@ public abstract class FilePathFormatter<TItem, TFolder> : IFormatter<TItem>
     /// <summary>
     /// Formats a file path for the given folder based on its metadata.
     /// </summary>
-    /// <param name="item">The folder to format a file path for.</param>
+    /// <param name="folder">The folder to format a file path for.</param>
     /// <returns>The file path.</returns>
-    public abstract string Format(TFolder item);
+    public abstract string Format(Folder folder);
 
     /// <summary>
     /// Sanitises a file/directory name ensuring it does not contain any invalid characters.

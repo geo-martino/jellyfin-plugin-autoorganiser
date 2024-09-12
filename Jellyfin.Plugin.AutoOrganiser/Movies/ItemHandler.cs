@@ -5,14 +5,14 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 
 /// <inheritdoc />
-public class ItemHandler : ItemHandler<Movie, BoxSet, FilePathFormatter>
+public class ItemHandler : ItemHandler<Movie, FilePathFormatter>
 {
     /// <inheritdoc />
     public ItemHandler(
         FilePathFormatter pathFormatter,
         bool dryRun,
         bool overwrite,
-        ILogger<ItemHandler<Movie, BoxSet, FilePathFormatter>> logger)
+        ILogger<ItemHandler<Movie, FilePathFormatter>> logger)
         : base(pathFormatter, dryRun, overwrite, logger)
     {
     }

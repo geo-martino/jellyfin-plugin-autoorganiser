@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 
 namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 
 /// <inheritdoc />
-public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
+public class FilePathFormatter : FilePathFormatter<Movie>
 {
     private readonly bool _forceSubFolder;
 
-    /// <inheritdoc cref="FilePathFormatter{Movie,BoxSet}(LabelFormatter)" />
+    /// <inheritdoc cref="FilePathFormatter{Movie}(LabelFormatter)" />
     /// <param name="labelFormatter">The object which handles label formatting for the item.</param>
     /// <param name="forceSubFolder">Whether to always place the movie within a subfolder even when it has no extra files.</param>
     public FilePathFormatter(LabelFormatter labelFormatter, bool forceSubFolder) : base(labelFormatter)
@@ -25,10 +25,10 @@ public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
     public override string Format(Movie item) => Path.Combine(item.GetTopParent().Path, GetStemPath(item));
 
     /// <inheritdoc />
-    public override string Format(BoxSet item)
+    public override string Format(Folder folder)
     {
-        var parentPath = item.GetTopParent().Path;
-        var boxSetName = SanitiseValue(item.Name);
+        var parentPath = folder.GetTopParent().Path;
+        var boxSetName = SanitiseValue(folder.Name);
 
         return Path.Combine(parentPath, boxSetName);
     }
@@ -53,7 +53,7 @@ public class FilePathFormatter : FilePathFormatter<Movie, BoxSet>
     /// <returns>The new paths for the items in the box set.</returns>
     public IEnumerable<Tuple<Movie, string>> GetPathsFromBoxSet(BoxSet boxSet)
     {
-        var boxSetName = new DirectoryInfo(Format(boxSet)).Name!;
+        var boxSetName = new DirectoryInfo(Format(boxSet)).Name;
 
         var paths = boxSet.Children
             .OfType<Movie>().Where(i => i.GetTopParent() is not null)

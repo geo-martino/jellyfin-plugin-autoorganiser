@@ -16,12 +16,10 @@ namespace Jellyfin.Plugin.AutoOrganiser.Core.Library;
 /// Handles movement of files on the system drive from a given library.
 /// </summary>
 /// <typeparam name="TItem">The <see cref="BaseItem"/> type that this formatter can process.</typeparam>
-/// <typeparam name="TFolder">The <see cref="Folder"/> type that can contain many <typeparamref name="TItem"/> types.</typeparam>
-/// <typeparam name="TPathFormatter">Type of the <see cref="FilePathFormatter{TItem,TFolder}"/> interface capable of processing <typeparamref name="TItem"/>.</typeparam>
-public class ItemHandler<TItem, TFolder, TPathFormatter>
+/// <typeparam name="TPathFormatter">Type of the <see cref="FilePathFormatter{TItem}"/> interface capable of processing <typeparamref name="TItem"/>.</typeparam>
+public class ItemHandler<TItem, TPathFormatter>
     where TItem : BaseItem
-    where TFolder : Folder
-    where TPathFormatter : FilePathFormatter<TItem, TFolder>
+    where TPathFormatter : FilePathFormatter<TItem>
 {
     /// <summary>
     /// The file name to give to extras of theme type.
@@ -34,9 +32,9 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     private const string UnknownExtrasFolderName = "extras";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ItemHandler{TItem,TFolder,TPathFormatter}"/> class.
+    /// Initializes a new instance of the <see cref="ItemHandler{TItem,TPathFormatter}"/> class.
     /// </summary>
-    /// <param name="pathFormatter">Instance of the <see cref="FilePathFormatter{TItem,TFolder}"/> interface.</param>
+    /// <param name="pathFormatter">Instance of the <see cref="FilePathFormatter{TItem}"/> interface.</param>
     /// <param name="dryRun">Whether to execute as a dry run, which does not modify any files.</param>
     /// <param name="overwrite">Whether to Overwrite any files that exist at the new path.</param>
     /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
@@ -44,7 +42,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
         TPathFormatter pathFormatter,
         bool dryRun,
         bool overwrite,
-        ILogger<ItemHandler<TItem, TFolder, TPathFormatter>> logger)
+        ILogger<ItemHandler<TItem, TPathFormatter>> logger)
     {
         PathFormatter = pathFormatter;
 
@@ -55,7 +53,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     }
 
     /// <summary>
-    /// Gets the instance of the <see cref="FilePathFormatter{TItem,TFolder}"/> interface.
+    /// Gets the instance of the <see cref="FilePathFormatter{TItem}"/> interface.
     /// </summary>
     public TPathFormatter PathFormatter { get; }
 
@@ -72,10 +70,10 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     /// <summary>
     /// Gets the logger.
     /// </summary>
-    protected ILogger<ItemHandler<TItem, TFolder, TPathFormatter>> Logger { get; }
+    protected ILogger<ItemHandler<TItem, TPathFormatter>> Logger { get; }
 
-    /// <inheritdoc cref="FilePathFormatter{TItem,TFolder}.Format(TFolder)"/>
-    public string Format(TFolder item)
+    /// <inheritdoc cref="FilePathFormatter{TItem}.Format(Folder)"/>
+    public string Format(Folder item)
     {
         try
         {
@@ -88,7 +86,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
         }
     }
 
-    /// <inheritdoc cref="FilePathFormatter{TItem,TFolder}.Format(TItem)"/>
+    /// <inheritdoc cref="FilePathFormatter{TItem}.Format(TItem)"/>
     public string Format(TItem item)
     {
         try
@@ -283,7 +281,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
     public IEnumerable<Task<bool>> MoveExtras(
         IReadOnlyCollection<BaseItem?> extras,
         CancellationToken cancellationToken,
-        TFolder? parent = null) => extras
+        Folder? parent = null) => extras
             .Where(extra => File.Exists(extra?.Path)).OfType<BaseItem>()
             .Select(extra =>
             {
@@ -291,7 +289,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
                 return MoveExtra(extra, unique, cancellationToken, parent);
             });
 
-    private async Task<bool> MoveExtra(BaseItem extra, bool unique, CancellationToken cancellationToken, TFolder? parent = null)
+    private async Task<bool> MoveExtra(BaseItem extra, bool unique, CancellationToken cancellationToken, Folder? parent = null)
     {
         if (cancellationToken.IsCancellationRequested)
         {
@@ -313,7 +311,7 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
             return false;
         }
 
-        var itemKind = string.Concat(extra.ExtraType.ToString()!.Select(CharToSnakeCase))
+        var itemKind = string.Concat(extra.ExtraType.ToString()!.Select(UpperCharToSpacedLower))
             .ToLowerInvariant().TrimEnd('s') + 's';
         var folderName = extra.ExtraType switch
         {
@@ -354,8 +352,8 @@ public class ItemHandler<TItem, TFolder, TPathFormatter>
         }
     }
 
-    private string CharToSnakeCase(char c, int index) => index > 0 && char
-        .IsUpper(c) ? "_" + c.ToString().ToLowerInvariant() : c.ToString();
+    private string UpperCharToSpacedLower(char c, int index) => index > 0 && char
+        .IsUpper(c) ? " " + c.ToString().ToLowerInvariant() : c.ToString();
 
     /// <summary>
     /// Update the given item's path reference in Jellyfin.

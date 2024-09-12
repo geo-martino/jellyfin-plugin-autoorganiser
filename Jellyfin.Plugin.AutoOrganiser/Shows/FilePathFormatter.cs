@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
@@ -11,11 +10,11 @@ using MediaBrowser.Controller.Entities.TV;
 namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 
 /// <inheritdoc />
-public class FilePathFormatter : FilePathFormatter<Episode, Season>
+public class FilePathFormatter : FilePathFormatter<Episode>
 {
     private readonly bool _addEpisodeName;
 
-    /// <inheritdoc cref="FilePathFormatter{Episode,Season}(LabelFormatter)" />
+    /// <inheritdoc cref="FilePathFormatter{Episode}(LabelFormatter)" />
     /// <param name="addEpisodeName">Whether to add the episode name to the file name.</param>
 #pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
     public FilePathFormatter(LabelFormatter labelFormatter, bool addEpisodeName) : base(labelFormatter)
@@ -40,9 +39,17 @@ public class FilePathFormatter : FilePathFormatter<Episode, Season>
     }
 
     /// <inheritdoc />
-    public override string Format(Season item) => FormatSeasonPath(item.Series, GetSeasonIndex(item));
+    public override string Format(Folder folder) => folder switch
+    {
+        Series series => Format(series),
+        Season season => Format(season),
+        _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, "Unrecognized show folder type")
+    };
 
-    /// <inheritdoc cref="Format(Season)"/>
+    /// <inheritdoc cref="Format(Folder)"/>
+    public string Format(Season item) => FormatSeasonPath(item.Series, GetSeasonIndex(item));
+
+    /// <inheritdoc cref="Format(Folder)"/>
     public string Format(Series item)
     {
         var parentPath = item.GetTopParent().Path;

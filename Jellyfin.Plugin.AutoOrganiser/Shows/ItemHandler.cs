@@ -7,19 +7,19 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 
 /// <inheritdoc />
-public class ItemHandler : ItemHandler<Episode, Season, FilePathFormatter>
+public class ItemHandler : ItemHandler<Episode, FilePathFormatter>
 {
     /// <inheritdoc />
     public ItemHandler(
         FilePathFormatter pathFormatter,
         bool dryRun,
         bool overwrite,
-        ILogger<ItemHandler<Episode, Season, FilePathFormatter>> logger)
+        ILogger<ItemHandler<Episode, FilePathFormatter>> logger)
         : base(pathFormatter, dryRun, overwrite, logger)
     {
     }
 
-    /// <inheritdoc cref="ItemHandler{TItem,TFolder,TPathFormatter}.Format(TFolder)"/>
+    /// <inheritdoc cref="ItemHandler{TItem,TPathFormatter}.Format(Folder)"/>
     public string Format(Series item)
     {
         try
