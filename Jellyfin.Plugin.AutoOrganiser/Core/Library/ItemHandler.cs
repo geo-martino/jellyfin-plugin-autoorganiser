@@ -79,9 +79,9 @@ public class ItemHandler<TItem, TPathFormatter>
         {
             return PathFormatter.Format(item);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Logger.LogCritical("Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogCritical(e, "Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }
@@ -93,18 +93,22 @@ public class ItemHandler<TItem, TPathFormatter>
         {
             return PathFormatter.Format(item);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Logger.LogCritical("Count not format a new path for item: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogCritical(e, "Count not format a new path for item: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }
 
     private void LogMove(string oldPath, string newPath, string itemKind, bool overwrite)
     {
-        var operation = overwrite ? "Overwriting" : "Moving";
-        var logPrefix = DryRun ? $"DRY RUN | {operation}" : operation;
-        Logger.LogInformation("{Prefix:l} {Kind:l}:\n\t>> {Old}\n\tto {New}", logPrefix, itemKind, oldPath, newPath);
+        Logger.LogInformation(
+            "{Prefix:l}{Operation} {Kind:l}:\n\t>> {Old}\n\tto {New}",
+            overwrite ? "Overwriting" : "Moving",
+            DryRun ? "DRY RUN | " : string.Empty,
+            itemKind,
+            oldPath,
+            newPath);
     }
 
     /// <summary>
@@ -200,9 +204,9 @@ public class ItemHandler<TItem, TPathFormatter>
             Directory.Move(oldDir, newDir);
             return true;
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException e)
         {
-            Logger.LogError("Insufficient permissions to write to {Path}", newDir);
+            Logger.LogError(e, "Insufficient permissions to write to {Path}", newDir);
         }
 
         return false;
@@ -230,9 +234,9 @@ public class ItemHandler<TItem, TPathFormatter>
                 {
                     File.Delete(newPath);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException e)
                 {
-                    Logger.LogError("Insufficient permissions to Overwrite {Path}", newPath);
+                    Logger.LogError(e, "Insufficient permissions to Overwrite {Path}", newPath);
                     return false;
                 }
             }
@@ -262,9 +266,9 @@ public class ItemHandler<TItem, TPathFormatter>
         {
             File.Move(oldPath, newPath);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException e)
         {
-            Logger.LogError("Insufficient permissions to move {OldPath} -> {NewPath}", oldPath, newPath);
+            Logger.LogError(e, "Insufficient permissions to move {OldPath} -> {NewPath}", oldPath, newPath);
             return false;
         }
 
@@ -384,17 +388,13 @@ public class ItemHandler<TItem, TPathFormatter>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task RunTasks(IEnumerable<Task<bool>> tasks)
     {
-        // var moveCount = (await Task.WhenAll(tasks).ConfigureAwait(false)).Count(result => result);
-        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-        var moveCount = results.Count(result => result);
+        var moveCount = (await Task.WhenAll(tasks).ConfigureAwait(false)).Count(result => result);
         if (moveCount == 0)
         {
             Logger.LogInformation("No items updated.");
             return;
         }
 
-        var logPrefix = DryRun ? "DRY RUN | " : string.Empty;
-        Logger.LogInformation("{Prefix:l}Moved {N} items", logPrefix, moveCount);
-        Logger.LogInformation(">>>>> Retrieved {N} results", results.Length);
+        Logger.LogInformation("{Prefix:l}Moved {N} items", DryRun ? "DRY RUN | " : string.Empty, moveCount);
     }
 }

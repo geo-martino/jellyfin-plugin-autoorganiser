@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -73,18 +74,18 @@ public class LibraryCleaner
             return;
         }
 
-        var logPrefix = dryRun ? "DRY RUN | Deleting" : "Deleting";
+        var logPrefix = dryRun ? "DRY RUN | " : string.Empty;
 
         foreach (var file in Directory.EnumerateFiles(directory))
         {
-            _logger.LogInformation("{Prefix:l} file {Dir}", logPrefix, file);
+            _logger.LogInformation("{Prefix:l}Deleting file {Dir}", logPrefix, file);
             if (!dryRun)
             {
                 File.Delete(file);
             }
         }
 
-        _logger.LogInformation("{Prefix:l} directory {Dir}", logPrefix, directory);
+        _logger.LogInformation("{Prefix:l}Deleting directory {Dir}", logPrefix, directory);
         if (!dryRun)
         {
             Directory.Delete(directory, false);

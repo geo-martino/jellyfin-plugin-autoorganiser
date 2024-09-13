@@ -26,9 +26,9 @@ public class ItemHandler : ItemHandler<Episode, FilePathFormatter>
         {
             return PathFormatter.Format(item);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Logger.LogCritical("Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogCritical(e, "Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }
