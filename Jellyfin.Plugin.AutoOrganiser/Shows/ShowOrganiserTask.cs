@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.AutoOrganiser.Core;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using Jellyfin.Plugin.AutoOrganiser.Core.Library;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -15,27 +17,33 @@ namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 public class ShowOrganiserTask : AutoOrganiserTask
 {
     private readonly ILibraryManager _libraryManager;
+    private readonly IDirectoryService _directoryService;
+    private readonly IServerConfigurationManager _serverConfig;
+
     private readonly ILogger<LibraryOrganiser> _loggerOrganiser;
-    private readonly ILogger<ItemHandler> _loggerItemHandler;
+    private readonly ILogger<FileHandler> _loggerFileHandler;
     private readonly ILogger<LibraryCleaner> _loggerCleaner;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ShowOrganiserTask"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="loggerOrganiser">Instance of the <see cref="ILogger{ShowOrganiserTask}"/> interface.</param>
-    /// <param name="loggerItemHandler">Instance of the <see cref="ItemHandler"/>.</param>
-    /// <param name="loggerCleaner">Instance of the <see cref="ILogger{LibraryCleaner}"/> interface.</param>
+    /// <param name="directoryService">Instance of the <see cref="IDirectoryService"/> interface.</param>
+    /// <param name="serverConfig">Instance of the <see cref="IServerConfigurationManager"/>.</param>
+    /// <param name="loggerFactory">Instance of the <see cref="ILoggerFactory"/> interface.</param>
     public ShowOrganiserTask(
         ILibraryManager libraryManager,
-        ILogger<LibraryOrganiser> loggerOrganiser,
-        ILogger<ItemHandler> loggerItemHandler,
-        ILogger<LibraryCleaner> loggerCleaner)
+        IDirectoryService directoryService,
+        IServerConfigurationManager serverConfig,
+        ILoggerFactory loggerFactory)
     {
         _libraryManager = libraryManager;
-        _loggerOrganiser = loggerOrganiser;
-        _loggerItemHandler = loggerItemHandler;
-        _loggerCleaner = loggerCleaner;
+        _directoryService = directoryService;
+        _serverConfig = serverConfig;
+
+        _loggerOrganiser = loggerFactory.CreateLogger<LibraryOrganiser>();
+        _loggerFileHandler = loggerFactory.CreateLogger<FileHandler>();
+        _loggerCleaner = loggerFactory.CreateLogger<LibraryCleaner>();
     }
 
     /// <inheritdoc />
@@ -70,11 +78,11 @@ public class ShowOrganiserTask : AutoOrganiserTask
         var labelFormatter = new LabelFormatter(
             addLabelResolution, addLabelCodec, addLabelBitDepth, addLabelDynamicRange);
         var pathFormatter = new FilePathFormatter(labelFormatter, addEpisodeName);
-        var itemHandler = new ItemHandler(pathFormatter, dryRun, overwrite, _loggerItemHandler);
+        var fileHandler = new FileHandler(pathFormatter, dryRun, overwrite, _loggerFileHandler);
         var progressHandler = new ProgressHandler(progress, 5, 95);
 
-        var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
-        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
+        var libraryOrganiser = new LibraryOrganiser(
+            _libraryManager, _directoryService, _serverConfig, fileHandler, dryRun, _loggerOrganiser);
 
         await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
         if (cancellationToken.IsCancellationRequested)
@@ -82,6 +90,9 @@ public class ShowOrganiserTask : AutoOrganiserTask
             return;
         }
 
+        progressHandler.SetProgressToFinal();
+
+        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
         libraryCleaner.CleanLibrary(CollectionTypeOptions.tvshows, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);

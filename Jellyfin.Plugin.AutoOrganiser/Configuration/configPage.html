@@ -23,7 +23,8 @@
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">
                                 Executes a dry run which does not modify any files.
-                                You may use this option to confirm the changes the plugin will make to your files by checking the log output.
+                                You may use this option to confirm the changes the plugin will make to your files
+                                by checking the log output.
                             </div>
                         </div>
 
@@ -35,6 +36,11 @@
                             <div class="fieldDescription checkboxFieldDescription">
                                 Checking this overwrite any files that exist at the new path when moving files/directories.
                                 Unchecking this always skips these files leaving them in their original location.
+                                <br>
+                                <strong>WARNING</strong>: This may delete files if the operation wants to move multiple 
+                                files to the same location.
+                                Always check through the log output of the operation with dry run enabled first before
+                                running with this option enabled.
                             </div>
                         </div>
 
@@ -118,11 +124,8 @@
                         <div class="sectionTitleContainer flex align-items-center">
                             <h2 class="sectionTitle">Clean up settings</h2>
                         </div>
-                        <div class="verticalSection">
-                            Configure clean up settings
-                        </div>
                         <div class="inputContainer">
-                            <label for="cleanIgnoreExtensions">Ignore extensions:</label>
+                            <label for="cleanIgnoreExtensions">Ignore extensions</label>
                             <input type="text" id="cleanIgnoreExtensions" is="emby-input" />
                             <div class="fieldDescription">
                                 Ignore files with these extensions when determining if a directory is empty and should be removed.

@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.AutoOrganiser.Core;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using Jellyfin.Plugin.AutoOrganiser.Core.Library;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -15,27 +17,33 @@ namespace Jellyfin.Plugin.AutoOrganiser.Movies;
 public class MovieOrganiserTask : AutoOrganiserTask
 {
     private readonly ILibraryManager _libraryManager;
+    private readonly IDirectoryService _directoryService;
+    private readonly IServerConfigurationManager _serverConfig;
+
     private readonly ILogger<LibraryOrganiser> _loggerOrganiser;
-    private readonly ILogger<ItemHandler> _loggerItemHandler;
+    private readonly ILogger<FileHandler> _loggerFileHandler;
     private readonly ILogger<LibraryCleaner> _loggerCleaner;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MovieOrganiserTask"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="loggerOrganiser">Instance of the <see cref="ILogger{ShowOrganiserTask}"/> interface.</param>
-    /// <param name="loggerItemHandler">Instance of the <see cref="ItemHandler"/>.</param>
-    /// <param name="loggerCleaner">Instance of the <see cref="ILogger{LibraryCleaner}"/> interface.</param>
+    /// <param name="directoryService">Instance of the <see cref="IDirectoryService"/> interface.</param>
+    /// <param name="serverConfig">Instance of the <see cref="IServerConfigurationManager"/>.</param>
+    /// <param name="loggerFactory">Instance of the <see cref="ILoggerFactory"/> interface.</param>
     public MovieOrganiserTask(
         ILibraryManager libraryManager,
-        ILogger<LibraryOrganiser> loggerOrganiser,
-        ILogger<ItemHandler> loggerItemHandler,
-        ILogger<LibraryCleaner> loggerCleaner)
+        IDirectoryService directoryService,
+        IServerConfigurationManager serverConfig,
+        ILoggerFactory loggerFactory)
     {
         _libraryManager = libraryManager;
-        _loggerOrganiser = loggerOrganiser;
-        _loggerItemHandler = loggerItemHandler;
-        _loggerCleaner = loggerCleaner;
+        _directoryService = directoryService;
+        _serverConfig = serverConfig;
+
+        _loggerOrganiser = loggerFactory.CreateLogger<LibraryOrganiser>();
+        _loggerFileHandler = loggerFactory.CreateLogger<FileHandler>();
+        _loggerCleaner = loggerFactory.CreateLogger<LibraryCleaner>();
     }
 
     /// <inheritdoc />
@@ -56,9 +64,7 @@ public class MovieOrganiserTask : AutoOrganiserTask
         var dryRun = AutoOrganiserPlugin.Instance.Configuration.DryRun;
         var overwrite = AutoOrganiserPlugin.Instance.Configuration.Overwrite;
         var cleanIgnoreExtensions = AutoOrganiserPlugin.Instance.Configuration.CleanIgnoreExtensions
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(x => x.TrimStart('.').ToLowerInvariant())
-            .ToArray();
+            .SplitArguments().ToArray();
 
         var addLabelResolution = AutoOrganiserPlugin.Instance.Configuration.LabelResolution;
         var addLabelCodec = AutoOrganiserPlugin.Instance.Configuration.LabelCodec;
@@ -67,14 +73,14 @@ public class MovieOrganiserTask : AutoOrganiserTask
 
         var forceSubFolder = AutoOrganiserPlugin.Instance.Configuration.ForceSubFolder;
 
-        var labelGenerator = new LabelFormatter(
+        var labelFormatter = new LabelFormatter(
             addLabelResolution, addLabelCodec, addLabelBitDepth, addLabelDynamicRange);
-        var pathGenerator = new FilePathFormatter(labelGenerator, forceSubFolder);
-        var itemHandler = new ItemHandler(pathGenerator, dryRun, overwrite, _loggerItemHandler);
+        var pathFormatter = new FilePathFormatter(labelFormatter, forceSubFolder);
+        var fileHandler = new FileHandler(pathFormatter, dryRun, overwrite, _loggerFileHandler);
         var progressHandler = new ProgressHandler(progress, 5, 95);
 
-        var libraryOrganiser = new LibraryOrganiser(itemHandler, _libraryManager, _loggerOrganiser);
-        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
+        var libraryOrganiser = new LibraryOrganiser(
+            _libraryManager, _directoryService, _serverConfig, fileHandler, dryRun, _loggerOrganiser);
 
         await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
         if (cancellationToken.IsCancellationRequested)
@@ -82,6 +88,7 @@ public class MovieOrganiserTask : AutoOrganiserTask
             return;
         }
 
+        var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
         libraryCleaner.CleanLibrary(CollectionTypeOptions.movies, cleanIgnoreExtensions, dryRun);
 
         progress.Report(100);

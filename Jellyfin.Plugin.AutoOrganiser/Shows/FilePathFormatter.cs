@@ -47,6 +47,7 @@ public class FilePathFormatter : FilePathFormatter<Episode>
     };
 
     /// <inheritdoc cref="Format(Folder)"/>
+    // ReSharper disable once MemberCanBePrivate.Global
     public string Format(Season item) => FormatSeasonPath(item.Series, GetSeasonIndex(item));
 
     /// <inheritdoc cref="Format(Folder)"/>
@@ -54,12 +55,7 @@ public class FilePathFormatter : FilePathFormatter<Episode>
     {
         var parentPath = item.GetTopParent().Path;
         var seriesName = SanitiseValue(item.Name);
-
-        var year = item.PremiereDate?.Year;
-        if (year is not null)
-        {
-            seriesName += $" ({year})";
-        }
+        seriesName = AppendYear(item, seriesName);
 
         return Path.Combine(parentPath, seriesName);
     }
@@ -102,13 +98,6 @@ public class FilePathFormatter : FilePathFormatter<Episode>
         return indexPadded;
     }
 
-    private string AppendEpisodeName(BaseItem item, string fileName)
-    {
-        if (_addEpisodeName)
-        {
-            fileName += $" - {SanitiseValue(item.Name)}";
-        }
-
-        return fileName;
-    }
+    private string AppendEpisodeName(BaseItem item, string fileName) =>
+        !_addEpisodeName ? fileName : $"{fileName} - {SanitiseValue(item.Name)}";
 }

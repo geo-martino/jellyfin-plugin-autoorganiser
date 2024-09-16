@@ -141,12 +141,7 @@ public class LabelFormatter : IFormatter<Video>
     public string AppendLabel(Video item, string fileName)
     {
         var label = Format(item);
-        if (label.Length > 0)
-        {
-            fileName += $" - [{label}]";
-        }
-
-        return fileName;
+        return label.Length == 0 ? fileName : $"{fileName} - [{label}]";
     }
 
     private static MediaStream? GetVideoStream(BaseItem item) => item
@@ -169,6 +164,11 @@ public class LabelFormatter : IFormatter<Video>
     {
         foreach (var widthHeightPair in widthHeightMap)
         {
+            if (height == widthHeightPair.Value)
+            {
+                break;
+            }
+
             if (width <= widthHeightPair.Key)
             {
                 height = widthHeightPair.Value;

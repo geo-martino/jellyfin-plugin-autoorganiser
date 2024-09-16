@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
@@ -33,6 +30,18 @@ public class FilePathFormatter : FilePathFormatter<Movie>
         return Path.Combine(parentPath, boxSetName);
     }
 
+    /// <summary>
+    /// Formats a file path for the given item based on its metadata and the metadata of its parent box set.
+    /// </summary>
+    /// <param name="item">The item to format a file path for.</param>
+    /// <param name="boxSet">The box set within which the item can be found.</param>
+    /// <returns>The file path.</returns>
+    public string Format(Movie item, BoxSet boxSet)
+    {
+        var boxSetName = new DirectoryInfo(Format(boxSet)).Name;
+        return Path.Combine(item.GetTopParent().Path, boxSetName, GetStemPath(item));
+    }
+
     private string GetStemPath(Movie item)
     {
         var parentPath = string.Empty;
@@ -46,38 +55,16 @@ public class FilePathFormatter : FilePathFormatter<Movie>
         return Path.Combine(parentPath, fileName);
     }
 
-    /// <summary>
-    /// Generates movie file paths from movies within a box set.
-    /// </summary>
-    /// <param name="boxSet">The box set to generate paths from.</param>
-    /// <returns>The new paths for the items in the box set.</returns>
-    public IEnumerable<Tuple<Movie, string>> GetPathsFromBoxSet(BoxSet boxSet)
-    {
-        var boxSetName = new DirectoryInfo(Format(boxSet)).Name;
-
-        var paths = boxSet.Children
-            .OfType<Movie>().Where(i => i.GetTopParent() is not null)
-            .Select(movie => new Tuple<Movie, string>(
-                movie, Path.Combine(movie.GetTopParent().Path, boxSetName, GetStemPath(movie))));
-
-        return paths;
-    }
-
     private string AppendSubFolder(Movie movie, string path)
     {
-        if (_forceSubFolder || movie.ExtraIds.Length > 0)
+        if (!_forceSubFolder && movie.ExtraIds.Length == 0)
         {
-            var folderName = SanitiseValue(movie.Name);
-
-            var year = movie.PremiereDate?.Year;
-            if (year is not null)
-            {
-                folderName += $" ({year})";
-            }
-
-            path = Path.Combine(path, folderName);
+            return path;
         }
 
-        return path;
+        var folderName = SanitiseValue(movie.Name);
+        folderName = AppendYear(movie, folderName);
+
+        return Path.Combine(path, folderName);
     }
 }

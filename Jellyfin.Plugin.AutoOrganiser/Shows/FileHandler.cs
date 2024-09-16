@@ -7,28 +7,33 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.AutoOrganiser.Shows;
 
 /// <inheritdoc />
-public class ItemHandler : ItemHandler<Episode, FilePathFormatter>
+public class FileHandler : FileHandler<Episode, FilePathFormatter>
 {
     /// <inheritdoc />
-    public ItemHandler(
+    public FileHandler(
         FilePathFormatter pathFormatter,
         bool dryRun,
         bool overwrite,
-        ILogger<ItemHandler<Episode, FilePathFormatter>> logger)
+        ILogger<FileHandler<Episode, FilePathFormatter>> logger)
         : base(pathFormatter, dryRun, overwrite, logger)
     {
     }
 
-    /// <inheritdoc cref="ItemHandler{TItem,TPathFormatter}.Format(Folder)"/>
+    /// <inheritdoc cref="FileHandler{TItem,TPathFormatter}.Format(Folder)"/>
     public string Format(Series item)
     {
+        if (!IsFormatPossible(item))
+        {
+            return item.Path;
+        }
+
         try
         {
             return PathFormatter.Format(item);
         }
         catch (Exception e)
         {
-            Logger.LogCritical(e, "Count not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogCritical(e, "Could not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }

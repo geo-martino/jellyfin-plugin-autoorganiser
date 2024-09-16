@@ -55,12 +55,7 @@ public abstract class FilePathFormatter<TItem> : IFormatter<TItem>
     protected string AppendYear(BaseItem item, string fileName)
     {
         var year = item.PremiereDate?.Year;
-        if (year is not null)
-        {
-            fileName += $" ({year})";
-        }
-
-        return fileName;
+        return year is null ? fileName : $"{fileName} ({year})";
     }
 
     /// <summary>

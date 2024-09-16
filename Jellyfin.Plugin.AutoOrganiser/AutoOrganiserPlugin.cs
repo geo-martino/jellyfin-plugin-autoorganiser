@@ -12,6 +12,7 @@ namespace Jellyfin.Plugin.AutoOrganiser;
 /// <summary>
 /// The main plugin.
 /// </summary>
+// ReSharper disable once ClassNeverInstantiated.Global
 public class AutoOrganiserPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>

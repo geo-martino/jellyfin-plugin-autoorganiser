@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -95,5 +94,5 @@ public class LibraryCleaner
     private IEnumerable<string> GetFilesInDirectory(
         string directory, IReadOnlyCollection<string> ignoreExtensions) => Directory
         .EnumerateFiles(directory)
-        .Where(file => !ignoreExtensions.Contains(Path.GetExtension(file).TrimStart('.').ToLowerInvariant()));
+        .Where(file => !ignoreExtensions.Any(file.ToLowerInvariant().EndsWith));
 }
