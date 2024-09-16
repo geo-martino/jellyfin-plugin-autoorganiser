@@ -37,7 +37,8 @@ public class LibraryCleaner
     public void CleanLibrary(CollectionTypeOptions kind, IReadOnlyCollection<string> ignoreExtensions, bool dryRun)
     {
         _logger.LogInformation(
-            "Cleaning library of empty folders. Case-insensitively ignoring extensions: {0:l}",
+            "Cleaning {Kind} library of empty folders. Case-insensitively ignoring extensions: {0:l}",
+            kind,
             string.Join(", ", ignoreExtensions));
 
         var parentDirectories = _libraryManager.GetVirtualFolders()

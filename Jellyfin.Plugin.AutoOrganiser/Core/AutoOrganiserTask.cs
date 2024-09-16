@@ -21,7 +21,7 @@ public abstract class AutoOrganiserTask : IScheduledTask, IConfigurableScheduled
     public bool IsLogged => true;
 
     /// <inheritdoc />
-    public string Category => "Auto-Organiser";
+    public virtual string Category => "Auto-Organiser";
 
     /// <inheritdoc />
     public abstract string Name { get; }
