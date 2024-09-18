@@ -85,7 +85,7 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
         progressHandler.SetProgressToFinal();
 
         await RefreshLibraries(items, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
-        await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
+        // await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
         ClearTempMetadataDir();
 
         if (DryRun)
@@ -93,13 +93,13 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
             return;
         }
 
-        await MatchItemsToParentFolders(updatedItems, boxSets, true, cancellationToken).ConfigureAwait(false);
-        foreach (var movie in updatedItems)
-        {
-            AddItemToParentFolder(movie);
-        }
-
-        await RefreshLibraries(items, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
+        // await MatchItemsToParentFolders(updatedItems, boxSets, true, cancellationToken).ConfigureAwait(false);
+        // foreach (var movie in updatedItems)
+        // {
+        //     AddItemToParentFolder(movie);
+        // }
+        //
+        // await RefreshLibraries(items, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
     }
 
     private IEnumerable<Movie?> OrganiseItem(BaseItem item, CancellationToken cancellationToken) => item switch
@@ -136,8 +136,8 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
             return moved;
         }
 
-        CopyMetadataToTempDir(movie);
-        AddItemToParentFolder(movie, parent);
+        // CopyMetadataToTempDir(movie);
+        // AddItemToParentFolder(movie, parent);
         return moved;
     }
 }

@@ -67,7 +67,7 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileHandler, FilePathF
         progressHandler.SetProgressToFinal();
 
         await RefreshLibraries(updatedItems, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
-        await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
+        // await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
         ClearTempMetadataDir();
     }
 

@@ -317,7 +317,7 @@ public class FileHandler<TItem, TPathFormatter>
                 }
                 catch (UnauthorizedAccessException e)
                 {
-                    Logger.LogError(e, "Insufficient permissions to Overwrite {Path}", targetPath);
+                    Logger.LogError(e, "Insufficient permissions to overwrite {Path}", targetPath);
                     return false;
                 }
             }
