@@ -128,12 +128,16 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
         var refreshOptions = new MetadataRefreshOptions(_directoryService)
         {
             MetadataRefreshMode = MetadataRefreshMode.Default,
+            ReplaceAllImages = false,
+            // The following args are temporarily set until a better fix
+            // for the dropping metadata problem can be implemented.
+            // Replace the enabled args with the commented args when implemented.
             RemoveOldMetadata = true,
-            ReplaceAllImages = true,
             ImageRefreshMode = MetadataRefreshMode.Default,
+            EnableRemoteContentProbe = true,
             // RemoveOldMetadata = false,
-            // ReplaceAllImages = false,
             // ImageRefreshMode = MetadataRefreshMode.None,
+            // EnableRemoteContentProbe = false,
             ForceSave = false,
         };
         var folders = items.Select(item => item.GetTopParent()).OfType<Folder>().ToHashSet().ToArray();
