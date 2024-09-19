@@ -127,11 +127,14 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
     {
         var refreshOptions = new MetadataRefreshOptions(_directoryService)
         {
-            MetadataRefreshMode = MetadataRefreshMode.ValidationOnly,
-            RemoveOldMetadata = false,
-            ReplaceAllImages = false,
+            MetadataRefreshMode = MetadataRefreshMode.Default,
+            RemoveOldMetadata = true,
+            ReplaceAllImages = true,
+            ImageRefreshMode = MetadataRefreshMode.Default,
+            // RemoveOldMetadata = false,
+            // ReplaceAllImages = false,
+            // ImageRefreshMode = MetadataRefreshMode.None,
             ForceSave = false,
-            ImageRefreshMode = MetadataRefreshMode.None
         };
         var folders = items.Select(item => item.GetTopParent()).OfType<Folder>().ToHashSet().ToArray();
 
