@@ -132,13 +132,11 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
             // The following args are temporarily set until a better fix
             // for the dropping metadata problem can be implemented.
             // Replace the enabled args with the commented args when implemented.
-            RemoveOldMetadata = true,
+            ReplaceAllMetadata = false,
             ImageRefreshMode = MetadataRefreshMode.Default,
-            EnableRemoteContentProbe = true,
             // RemoveOldMetadata = false,
             // ImageRefreshMode = MetadataRefreshMode.None,
             // EnableRemoteContentProbe = false,
-            ForceSave = false,
         };
         var folders = items.Select(item => item.GetTopParent()).OfType<Folder>().ToHashSet().ToArray();
 
