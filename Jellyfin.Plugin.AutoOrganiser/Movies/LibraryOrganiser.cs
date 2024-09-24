@@ -84,7 +84,7 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
         LogResults(updatedItems);
         progressHandler.SetProgressToFinal();
 
-        await RefreshLibraries(items, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
+        await RefreshLibraries(updatedItems, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
         // await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
         ClearTempMetadataDir();
 
