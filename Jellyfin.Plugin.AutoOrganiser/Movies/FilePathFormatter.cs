@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Jellyfin.Plugin.AutoOrganiser.Core.Formatters;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
@@ -39,13 +40,14 @@ public class FilePathFormatter : FilePathFormatter<Movie>
     public string Format(Movie item, BoxSet boxSet)
     {
         var boxSetName = new DirectoryInfo(Format(boxSet)).Name;
-        return Path.Combine(item.GetTopParent().Path, boxSetName, GetStemPath(item));
+        var forceSubFolder = boxSet.GetRecursiveChildren().OfType<Movie>().Sum(movie => movie.ExtraIds.Length) > 0;
+        return Path.Combine(item.GetTopParent().Path, boxSetName, GetStemPath(item, forceSubFolder));
     }
 
-    private string GetStemPath(Movie item)
+    private string GetStemPath(Movie item, bool forceSubFolder = false)
     {
         var parentPath = string.Empty;
-        parentPath = AppendSubFolder(item, parentPath);
+        parentPath = AppendSubFolder(item, parentPath, forceSubFolder);
 
         var fileName = SanitiseValue(item.Name);
         fileName = AppendYear(item, fileName);
@@ -55,9 +57,9 @@ public class FilePathFormatter : FilePathFormatter<Movie>
         return Path.Combine(parentPath, fileName);
     }
 
-    private string AppendSubFolder(Movie movie, string path)
+    private string AppendSubFolder(Movie movie, string path, bool forceSubFolder = false)
     {
-        if (!_forceSubFolder && movie.ExtraIds.Length == 0)
+        if (!forceSubFolder && !_forceSubFolder && movie.ExtraIds.Length == 0)
         {
             return path;
         }
