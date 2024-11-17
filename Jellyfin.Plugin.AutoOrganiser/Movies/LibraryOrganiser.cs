@@ -115,29 +115,27 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
         .OfType<Movie>().Where(i => i.GetTopParent() is not null)
         .Select(movie => OrganiseMovie(movie, FileHandler.Format(movie, boxSet), boxSet, cancellationToken) ? movie : null);
 
-    private bool OrganiseMovie(
-        Movie movie, string newPath, Folder? parent, CancellationToken cancellationToken) =>
-        MoveMovie(movie, newPath, parent, cancellationToken) ||
-        OrganiseExtras(movie, FormatParentName(movie, parent), cancellationToken) > 0;
-
-    private string FormatParentName(Movie movie, Folder? parent) =>
-        parent == null ? movie.Name : $"{parent.Name}: {movie.Name}";
-
-    private bool MoveMovie(Movie movie, string newPath, Folder? parent, CancellationToken cancellationToken)
+    private bool OrganiseMovie(Movie movie, string newPath, Folder? parent, CancellationToken cancellationToken)
     {
         var moved = FileHandler.MoveItem(movie, newPath, cancellationToken);
-        if (!moved)
-        {
-            return false;
-        }
+        moved |= OrganiseExtras(movie, FormatParentName(movie, parent), cancellationToken) > 0;
+        return moved;
 
-        if (DryRun)
-        {
-            return moved;
-        }
+        // if (!moved)
+        // {
+        //     return false;
+        // }
+        //
+        // if (DryRun)
+        // {
+        //     return moved;
+        // }
 
         // CopyMetadataToTempDir(movie);
         // AddItemToParentFolder(movie, parent);
-        return moved;
+        // return moved;
     }
+
+    private string FormatParentName(Movie movie, Folder? parent) =>
+        parent == null ? movie.Name : $"{parent.Name}: {movie.Name}";
 }
