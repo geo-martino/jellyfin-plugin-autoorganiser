@@ -197,7 +197,7 @@ public class FileHandler<TItem, TPathFormatter>
 
         if (!DryRun && !Directory.Exists(sourceDir))
         {
-            Logger.LogWarning("Cannot not move directory. Source directory does not exist at path: {Path}", sourceDir);
+            Logger.LogWarning("Cannot move directory. Source directory does not exist at path: {Path}", sourceDir);
             return false;
         }
 
@@ -241,19 +241,19 @@ public class FileHandler<TItem, TPathFormatter>
 
         if (!DryRun && !Directory.Exists(sourceDir))
         {
-            Logger.LogWarning("Cannot not move directory. Source directory does not exist at path: {Path}", sourceDir);
+            Logger.LogWarning("Cannot move directory. Source directory does not exist at path: {Path}", sourceDir);
             return false;
         }
 
         if (File.Exists(targetDir))
         {
-            Logger.LogWarning("Cannot not move directory. File exists at path: {Path}", targetDir);
+            Logger.LogWarning("Cannot move directory. File exists at path: {Path}", targetDir);
             return false;
         }
 
         if (!Overwrite && Directory.Exists(targetDir))
         {
-            Logger.LogWarning("Cannot not move directory. Directory already exists at path: {Path}", targetDir);
+            Logger.LogWarning("Cannot move directory. Directory already exists at path: {Path}", targetDir);
             return false;
         }
 
@@ -296,13 +296,13 @@ public class FileHandler<TItem, TPathFormatter>
 
         if (!DryRun && !File.Exists(sourcePath))
         {
-            Logger.LogWarning("Cannot not move directory. Source directory does not exist at path: {Path}", sourcePath);
+            Logger.LogWarning("Cannot move directory. Source directory does not exist at path: {Path}", sourcePath);
             return false;
         }
 
         if (Directory.Exists(targetPath))
         {
-            Logger.LogWarning("Cannot not move file. Directory exists at path: {Path}", targetPath);
+            Logger.LogWarning("Cannot move file. Directory exists at path: {Path}", targetPath);
             return false;
         }
 
@@ -331,7 +331,7 @@ public class FileHandler<TItem, TPathFormatter>
         {
             if (!DryRun)
             {
-                Logger.LogWarning("Cannot not move file. File already exists at path: {Path}", targetPath);
+                Logger.LogWarning("Cannot move file. File already exists at path: {Path}", targetPath);
             }
 
             return false;
