@@ -122,16 +122,16 @@ public class FileHandler<TItem, TPathFormatter>
     /// <returns>Whether a new path can be formatted for the item.</returns>
     protected bool IsFormatPossible(BaseItem item)
     {
-        if (item.GetTopParent() is null)
+        if (item.GetTopParent() is not null)
         {
-            Logger.LogWarning(
-                "Could not format a new path for folder as it does not have a top parent: {Name} - {Path}",
-                item.Name,
-                item.Path);
-            return false;
+            return true;
         }
 
-        return true;
+        Logger.LogWarning(
+            "Could not format a new path for folder as it does not have a top parent: {Name} - {Path}",
+            item.Name,
+            item.Path);
+        return false;
     }
 
     private void LogMove(string oldPath, string newPath, string itemKind, bool overwrite) => Logger.LogInformation(
@@ -368,12 +368,12 @@ public class FileHandler<TItem, TPathFormatter>
     {
         Directory.CreateDirectory(targetDir);
 
-        foreach (string dirPath in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
+        foreach (var dirPath in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
         {
             Directory.CreateDirectory(dirPath.Replace(sourceDir, targetDir, StringComparison.Ordinal));
         }
 
-        foreach (string newPath in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
+        foreach (var newPath in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
         {
             File.Copy(
                 newPath,

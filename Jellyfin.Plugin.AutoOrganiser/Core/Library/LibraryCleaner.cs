@@ -37,7 +37,7 @@ public class LibraryCleaner
     public void CleanLibrary(CollectionTypeOptions kind, IReadOnlyCollection<string> ignoreExtensions, bool dryRun)
     {
         _logger.LogInformation(
-            "Cleaning {Kind} library of empty folders. Case-insensitively ignoring extensions: {0:l}",
+            "Cleaning {Kind} library of empty folders. Case-insensitively ignoring extensions: {Extensions:l}",
             kind,
             string.Join(", ", ignoreExtensions));
 
@@ -47,7 +47,7 @@ public class LibraryCleaner
 
         foreach (var parentDirectory in parentDirectories)
         {
-            _logger.LogInformation("Cleaning folder: {0}", parentDirectory);
+            _logger.LogInformation("Cleaning folder: {Directory}", parentDirectory);
 
             foreach (var directory in Directory.EnumerateDirectories(parentDirectory))
             {
@@ -92,7 +92,7 @@ public class LibraryCleaner
         }
     }
 
-    private IEnumerable<string> GetFilesInDirectory(
+    private static IEnumerable<string> GetFilesInDirectory(
         string directory, IReadOnlyCollection<string> ignoreExtensions) => Directory
         .EnumerateFiles(directory)
         .Where(file => !ignoreExtensions.Any(file.ToLowerInvariant().EndsWith));

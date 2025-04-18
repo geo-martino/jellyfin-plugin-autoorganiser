@@ -5,18 +5,19 @@ namespace Jellyfin.Plugin.AutoOrganiser.Configuration;
 /// <summary>
 /// Plugin configuration.
 /// </summary>
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable once ClassNeverInstantiated.Global
 public class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>
     /// Gets or sets a value indicating whether to execute as a dry run.
     /// </summary>
-    public bool DryRun { get; set; } = false;
+    public bool DryRun { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to overwrite any files that exist at the new path when moving files/directories.
     /// </summary>
-    public bool Overwrite { get; set; } = false;
+    public bool Overwrite { get; set; }
 
     /// <summary>
     /// Gets or sets the extensions to ignore when removing empty directories in a library.
@@ -26,27 +27,27 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets a value indicating whether to add the video resolution on the file name's label.
     /// </summary>
-    public bool LabelResolution { get; set; } = false;
+    public bool LabelResolution { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video codec on the file name's label.
     /// </summary>
-    public bool LabelCodec { get; set; } = false;
+    public bool LabelCodec { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video bit depth on the file name's label.
     /// </summary>
-    public bool LabelBitDepth { get; set; } = false;
+    public bool LabelBitDepth { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the video range on the file name's label.
     /// </summary>
-    public bool LabelDynamicRange { get; set; } = false;
+    public bool LabelDynamicRange { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to always put movie files in sub-folder.
     /// </summary>
-    public bool ForceSubFolder { get; set; } = false;
+    public bool ForceSubFolder { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to add the episode name to the file name.

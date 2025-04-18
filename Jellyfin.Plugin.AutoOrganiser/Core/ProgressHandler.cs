@@ -29,7 +29,7 @@ public class ProgressHandler
     /// <summary>
     /// Gets the stored instance of the <see cref="IProgress{T}"/> interface.
     /// </summary>
-    public IProgress<double> Progress { get; }
+    private IProgress<double> Progress { get; }
 
     /// <summary>
     /// Updates the progress bar.
@@ -42,7 +42,7 @@ public class ProgressHandler
     public TO Report<TO>(int index, int total, TO obj)
     {
         var percentageModifier = _final - _initial;
-        var progressPercentage = (index / (double)total) * percentageModifier;
+        var progressPercentage = index / (double)total * percentageModifier;
         Progress.Report(_initial + progressPercentage);
 
         return obj;

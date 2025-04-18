@@ -63,7 +63,7 @@ public class FilePathFormatter : FilePathFormatter<Episode>
     private string FormatSeasonPath(Series series, string seasonIndex) => Path
         .Combine(Format(series), $"Season {seasonIndex}");
 
-    private string AppendIdentifier(Episode episode, string fileName) => string
+    private static string AppendIdentifier(Episode episode, string fileName) => string
         .Format(
             CultureInfo.InvariantCulture,
             "{0} S{1}E{2}",
@@ -71,21 +71,21 @@ public class FilePathFormatter : FilePathFormatter<Episode>
             episode.Season is not null ? GetSeasonIndex(episode.Season) : GetSeasonIndex(episode),
             GetEpisodeIndex(episode));
 
-    private string GetSeasonIndex(Season season) =>
+    private static string GetSeasonIndex(Season season) =>
         PadIndexNumber(season.IndexNumber, season.Series.Children.OfType<Season>());
 
-    private string GetSeasonIndex(Episode episode) =>
+    private static string GetSeasonIndex(Episode episode) =>
         PadIndexNumber(episode.ParentIndexNumber, episode.Series.Children.OfType<Season>());
 
-    private string GetEpisodeIndex(Episode episode) => episode.Season switch
+    private static string GetEpisodeIndex(Episode episode) => episode.Season switch
     {
         null => PadIndexNumber(episode.IndexNumber),
         _ => PadIndexNumber(episode.IndexNumber, episode.Season.Children.OfType<Episode>())
     };
 
-    private string PadIndexNumber(int? index, IEnumerable<BaseItem>? items = null)
+    private static string PadIndexNumber(int? index, IEnumerable<BaseItem>? items = null)
     {
-        var padMin = 2;
+        const int padMin = 2;
         var indexNumber = index ?? 0;
 
         var pad = (items ?? []).DefaultIfEmpty()

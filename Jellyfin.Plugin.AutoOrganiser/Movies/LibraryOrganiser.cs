@@ -84,15 +84,15 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
         LogResults(updatedItems);
         progressHandler.SetProgressToFinal();
 
-        await LibraryManager.ValidateTopLibraryFolders(cancellationToken, false).ConfigureAwait(false);
+        await LibraryManager.ValidateTopLibraryFolders(cancellationToken).ConfigureAwait(false);
         // await RefreshLibraries(updatedItems, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
         // await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
         ClearTempMetadataDir();
 
-        if (DryRun)
-        {
-            return;
-        }
+        // if (DryRun)
+        // {
+        //     return;
+        // }
 
         // await MatchItemsToParentFolders(updatedItems, boxSets, true, cancellationToken).ConfigureAwait(false);
         // foreach (var movie in updatedItems)
@@ -119,7 +119,15 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
     private bool OrganiseMovie(Movie movie, string newPath, Folder? parent, CancellationToken cancellationToken)
     {
         var moved = FileHandler.MoveItem(movie, newPath, cancellationToken);
-        moved |= OrganiseExtras(movie, FormatParentName(movie, parent), cancellationToken) > 0;
+        var parentDirectory = parent != null ? FileHandler.Format(parent) : Path.GetDirectoryName(movie.Path)!;
+        var parentName = FormatParentName(movie, parent);
+        moved |= FileHandler.MoveExtras(
+            movie.GetExtras().ToArray(),
+            parentDirectory,
+            parentName,
+            movie.GetBaseItemKind(),
+            cancellationToken) > 0;
+
         return moved;
 
         // if (!moved)
@@ -137,6 +145,6 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
         // return moved;
     }
 
-    private string FormatParentName(Movie movie, Folder? parent) =>
+    private static string FormatParentName(Movie movie, Folder? parent) =>
         parent == null ? movie.Name : $"{parent.Name}: {movie.Name}";
 }

@@ -68,7 +68,7 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
     /// <summary>
     /// Gets a value indicating whether to execute as a dry run.
     /// </summary>
-    protected bool DryRun { get; }
+    private bool DryRun { get; }
 
     /// <summary>
     /// Gets the logger.
@@ -84,21 +84,6 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
     /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public abstract Task Organise(ProgressHandler progressHandler, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Organise the extras for a given item.
-    /// </summary>
-    /// <param name="item">The item for which to organise extras.</param>
-    /// <param name="parentName">The parent name. Used for logging only.</param>
-    /// <param name="cancellationToken">Instance of the <see cref="CancellationToken"/>.</param>
-    /// <returns>The number of extras moved.</returns>
-    protected int OrganiseExtras(BaseItem item, string parentName, CancellationToken cancellationToken) =>
-        FileHandler.MoveExtras(
-            item.GetExtras().ToArray(),
-            item is Folder ? item.Path : Path.GetDirectoryName(item.Path)!,
-            parentName,
-            item.GetBaseItemKind(),
-            cancellationToken);
 
     /// <summary>
     /// Logs the results of moving items to new locations.
@@ -260,7 +245,7 @@ public abstract class LibraryOrganiser<TItem, TFileHandler, TPathFormatter>
     private string FormatTempMetadataPath(BaseItem item) => Path
         .Combine(TempMetadataDir, FormatMetadataStemPath(item.Id));
 
-    private string FormatMetadataStemPath(Guid id) => Path
+    private static string FormatMetadataStemPath(Guid id) => Path
         .Combine(id.ToString()[..2], id.ToString("N", CultureInfo.InvariantCulture));
 
     /// <summary>

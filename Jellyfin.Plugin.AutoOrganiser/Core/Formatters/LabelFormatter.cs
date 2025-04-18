@@ -169,11 +169,13 @@ public class LabelFormatter : IFormatter<Video>
                 break;
             }
 
-            if (width <= widthHeightPair.Key)
+            if (width > widthHeightPair.Key)
             {
-                height = widthHeightPair.Value;
-                break;
+                continue;
             }
+
+            height = widthHeightPair.Value;
+            break;
         }
 
         return height;

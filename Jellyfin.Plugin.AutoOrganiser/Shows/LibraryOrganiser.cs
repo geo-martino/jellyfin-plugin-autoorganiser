@@ -66,7 +66,7 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileHandler, FilePathF
         LogResults(updatedItems);
         progressHandler.SetProgressToFinal();
 
-        await LibraryManager.ValidateTopLibraryFolders(cancellationToken, false).ConfigureAwait(false);
+        await LibraryManager.ValidateTopLibraryFolders(cancellationToken).ConfigureAwait(false);
         // await RefreshLibraries(updatedItems, progressHandler.Progress, cancellationToken).ConfigureAwait(false);
         // await ReplaceMetadata(updatedItems, cancellationToken).ConfigureAwait(false);
         ClearTempMetadataDir();
@@ -76,26 +76,21 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileHandler, FilePathF
     {
         var results = OrganiseChildren(folder, cancellationToken);
 
-        var newPath = folder switch
+        folder.Path = folder switch
         {
             Series series => FileHandler.Format(series),
             Season season => FileHandler.Format(season),
-            _ => null
+            _ => folder.Path
         };
-
-        if (newPath != null)
-        {
-            folder.Path = newPath;
-            await folder.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, cancellationToken).ConfigureAwait(false);
-        }
 
         return await results.ConfigureAwait(false);
     }
 
     private async Task<IEnumerable<Episode?>> OrganiseChildren(Folder folder, CancellationToken cancellationToken) => folder switch
     {
-        Series series => (await OrganiseChildSeasons(series, cancellationToken).ConfigureAwait(false))
-            .Concat(OrganiseChildEpisodes(series, cancellationToken)),
+        Series series => (
+                await OrganiseChildSeasons(series, cancellationToken).ConfigureAwait(false)
+                ).Concat(OrganiseChildEpisodes(series, cancellationToken)),
         Season season => OrganiseChildEpisodes(season, cancellationToken),
         _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, "Unrecognized show folder type")
     };
@@ -112,13 +107,20 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileHandler, FilePathF
             .OfType<Episode>().Where(item => File.Exists(item.Path))
             .Select(episode => OrganiseEpisode(episode, cancellationToken) ? episode : null);
 
+        var parentDirectory = FileHandler.Format(folder);
         var parentName = folder switch
         {
             Series series => series.Name,
             Season season => $"{season.Series.Name}: {season.Name}",
             _ => string.Empty
         };
-        OrganiseExtras(folder, parentName, cancellationToken);
+
+        _ = FileHandler.MoveExtras(
+            folder.GetExtras().ToArray(),
+            parentDirectory,
+            parentName,
+            folder.GetBaseItemKind(),
+            cancellationToken) > 0;
 
         return episodes;
     }
