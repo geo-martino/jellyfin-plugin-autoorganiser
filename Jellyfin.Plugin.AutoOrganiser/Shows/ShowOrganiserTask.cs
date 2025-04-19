@@ -85,10 +85,7 @@ public class ShowOrganiserTask : AutoOrganiserTask
             _libraryManager, _directoryService, _serverConfig, fileHandler, dryRun, _loggerOrganiser);
 
         await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
         progressHandler.SetProgressToFinal();
 

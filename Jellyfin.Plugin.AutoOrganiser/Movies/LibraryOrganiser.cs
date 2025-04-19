@@ -119,7 +119,7 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
     private bool OrganiseMovie(Movie movie, string newPath, Folder? parent, CancellationToken cancellationToken)
     {
         var moved = FileHandler.MoveItem(movie, newPath, cancellationToken);
-        var parentDirectory = parent != null ? FileHandler.Format(parent) : Path.GetDirectoryName(movie.Path)!;
+        var parentDirectory = Path.GetDirectoryName(movie.Path)!;
         var parentName = FormatParentName(movie, parent);
         moved |= FileHandler.MoveExtras(
             movie.GetExtras().ToArray(),

@@ -159,10 +159,7 @@ public class FileHandler<TItem, TPathFormatter>
         T item, string newPath, string itemKind, CancellationToken cancellationToken)
         where T : BaseItem
     {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return false;
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
         var moved = item.Path switch
         {

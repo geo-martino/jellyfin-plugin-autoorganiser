@@ -83,10 +83,7 @@ public class MovieOrganiserTask : AutoOrganiserTask
             _libraryManager, _directoryService, _serverConfig, fileHandler, dryRun, _loggerOrganiser);
 
         await libraryOrganiser.Organise(progressHandler, cancellationToken).ConfigureAwait(false);
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
         var libraryCleaner = new LibraryCleaner(_libraryManager, _loggerCleaner);
         libraryCleaner.CleanLibrary(CollectionTypeOptions.movies, cleanIgnoreExtensions, dryRun);
