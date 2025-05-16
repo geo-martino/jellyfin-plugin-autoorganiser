@@ -58,7 +58,11 @@ public class LibraryOrganiser : LibraryOrganiser<Episode, FileHandler, FilePathF
 
         progressHandler.SetProgressToInitial();
         var updatedResults = await shows
-            .Select((series, idx) => progressHandler.Report(idx, shows.Length, series))
+            .Select((series, idx) =>
+            {
+                progressHandler.Progress(idx, shows.Length);
+                return series;
+            })
             .SelectManyAsync(series => OrganiseFolder(series, cancellationToken))
             .ConfigureAwait(false);
         var updatedItems = updatedResults.OfType<Episode>().ToArray();

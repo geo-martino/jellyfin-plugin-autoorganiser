@@ -7,6 +7,7 @@ namespace Jellyfin.Plugin.AutoOrganiser.Core;
 /// </summary>
 public class ProgressHandler
 {
+    private readonly IProgress<double> _progress;
     private readonly double _initial;
     private readonly double _final;
 
@@ -21,40 +22,30 @@ public class ProgressHandler
         double initial = 0.0,
         double final = 100.0)
     {
-        Progress = progress;
+        _progress = progress;
         _initial = initial;
         _final = final;
     }
-
-    /// <summary>
-    /// Gets the stored instance of the <see cref="IProgress{T}"/> interface.
-    /// </summary>
-    private IProgress<double> Progress { get; }
 
     /// <summary>
     /// Updates the progress bar.
     /// </summary>
     /// <param name="index">The index of the current item.</param>
     /// <param name="total">The total number of items.</param>
-    /// <param name="obj">Object to return.</param>
-    /// <typeparam name="TO">The object given to be returned. This may be of any type.</typeparam>
-    /// <returns>The given `obj`.</returns>
-    public TO Report<TO>(int index, int total, TO obj)
+    public void Progress(int index, int total)
     {
         var percentageModifier = _final - _initial;
-        var progressPercentage = index / (double)total * percentageModifier;
-        Progress.Report(_initial + progressPercentage);
-
-        return obj;
+        var progressPercentage = (index / (double)total) * percentageModifier;
+        _progress.Report(_initial + progressPercentage);
     }
 
     /// <summary>
     /// Sets the progress to the initial value.
     /// </summary>
-    public void SetProgressToInitial() => Progress.Report(_initial);
+    public void SetProgressToInitial() => _progress.Report(_initial);
 
     /// <summary>
     /// Sets the progress to the initial value.
     /// </summary>
-    public void SetProgressToFinal() => Progress.Report(_final);
+    public void SetProgressToFinal() => _progress.Report(_final);
 }

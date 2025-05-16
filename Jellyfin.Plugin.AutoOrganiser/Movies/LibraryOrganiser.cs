@@ -76,8 +76,11 @@ public class LibraryOrganiser : LibraryOrganiser<Movie, FileHandler, FilePathFor
 
         progressHandler.SetProgressToInitial();
         var updatedItems = items
-            .Select((task, idx) => progressHandler.Report(idx, items.Length, task))
-            .SelectMany(item => OrganiseItem(item, cancellationToken))
+            .SelectMany((item, idx) =>
+            {
+                progressHandler.Progress(idx, items.Length);
+                return OrganiseItem(item, cancellationToken);
+            })
             .OfType<Movie>()
             .ToList();
 
