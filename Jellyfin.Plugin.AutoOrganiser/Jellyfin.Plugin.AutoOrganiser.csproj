@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.AutoOrganiser</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -9,11 +9,15 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
+    <Version>10.10.7.0</Version>
+    <RepositoryUrl>https://github.com/geo-martino/jellyfin-plugin-autoorganiser</RepositoryUrl>
+    <AssemblyVersion>10.10.7.0</AssemblyVersion>
+    <FileVersion>10.10.7.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="10.10.0" />
-    <PackageReference Include="Jellyfin.Model" Version="10.10.0" />
+    <PackageReference Include="Jellyfin.Controller" Version="10.*-*" />
+    <PackageReference Include="Jellyfin.Model" Version="10.*-*" />
   </ItemGroup>
 
   <ItemGroup>
