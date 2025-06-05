@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using MediaBrowser.Controller.Entities;
@@ -55,7 +56,19 @@ public abstract class FilePathFormatter<TItem> : IFormatter<TItem>
     protected string AppendYear(BaseItem item, string fileName)
     {
         var year = item.PremiereDate?.Year;
-        return year is null ? fileName : $"{fileName} ({year})";
+        if (year is null)
+        {
+            return fileName;
+        }
+
+        // Never append the year if already present
+        var yearSuffix = $"({year})";
+        if (fileName.EndsWith(yearSuffix, StringComparison.Ordinal))
+        {
+            return fileName;
+        }
+
+        return $"{fileName} {yearSuffix}";
     }
 
     /// <summary>
