@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Plugin.AutoOrganiser.Core;
 using Jellyfin.Plugin.AutoOrganiser.Core.Library;
 using MediaBrowser.Controller.Configuration;

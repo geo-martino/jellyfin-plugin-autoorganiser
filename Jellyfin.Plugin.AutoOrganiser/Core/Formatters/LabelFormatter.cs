@@ -1,3 +1,4 @@
+using System.Linq;
 using J2N.Collections.Generic;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
@@ -145,7 +146,7 @@ public class LabelFormatter : IFormatter<Video>
     }
 
     private static MediaStream? GetVideoStream(BaseItem item) => item
-        .GetMediaStreams().Find(stream => stream.Type == MediaStreamType.Video);
+        .GetMediaStreams().First(stream => stream.Type == MediaStreamType.Video);
 
     private string GetResolution(BaseItem item)
     {
