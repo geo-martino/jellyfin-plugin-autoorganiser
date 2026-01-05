@@ -138,11 +138,22 @@ public class LabelFormatter : IFormatter<Video>
     /// </summary>
     /// <param name="item">The item to format a label for.</param>
     /// <param name="fileName">The file name to enrich.</param>
+    /// <param name="addDash">Separate the label from the fileName with a dash.</param>
     /// <returns>The enriched file name.</returns>
-    public string AppendLabel(Video item, string fileName)
+    public string AppendLabel(Video item, string fileName, bool addDash = true)
     {
         var label = Format(item);
-        return label.Length == 0 ? fileName : $"{fileName} - [{label}]";
+        if (label.Length == 0)
+        {
+            return fileName;
+        }
+
+        if (addDash)
+        {
+            fileName = $"{fileName.TrimEnd(' ', '-')} -";
+        }
+
+        return $"{fileName.TrimEnd()} [{label}]";
     }
 
     private static MediaStream? GetVideoStream(BaseItem item) => item

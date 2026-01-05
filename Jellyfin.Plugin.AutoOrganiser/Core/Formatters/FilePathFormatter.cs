@@ -68,7 +68,7 @@ public abstract class FilePathFormatter<TItem> : IFormatter<TItem>
             return fileName;
         }
 
-        return $"{fileName} {yearSuffix}";
+        return $"{fileName.TrimEnd()} {yearSuffix}";
     }
 
     /// <summary>
@@ -77,6 +77,6 @@ public abstract class FilePathFormatter<TItem> : IFormatter<TItem>
     /// <param name="item">The item extract the original file extension from.</param>
     /// <param name="fileName">The file name to enrich.</param>
     /// <returns>The enriched file name.</returns>
-    protected internal string AppendExtension(BaseItem item, string fileName) => fileName + Path
+    protected internal string AppendExtension(BaseItem item, string fileName) => fileName.TrimEnd() + Path
         .GetExtension(item.Path).ToLowerInvariant();
 }

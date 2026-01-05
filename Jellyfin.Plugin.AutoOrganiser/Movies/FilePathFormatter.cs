@@ -51,7 +51,7 @@ public class FilePathFormatter : FilePathFormatter<Movie>
 
         var fileName = SanitiseValue(item.Name);
         fileName = AppendYear(item, fileName);
-        fileName = LabelFormatter.AppendLabel(item, fileName);
+        fileName = LabelFormatter.AppendLabel(item, fileName, item.PremiereDate?.Year != null);
         fileName = AppendExtension(item, fileName);
 
         return Path.Combine(parentPath, fileName);
