@@ -32,7 +32,7 @@ public class FileHandler : FileHandler<Movie, FilePathFormatter>
         }
         catch (Exception e)
         {
-            Logger.LogCritical(
+            Logger.LogError(
                 e,
                 "Could not format a new path for movie within box set: \"{BoxSet:l}: {Name:l}\" - {Path}",
                 boxSet.Name,

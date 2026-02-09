@@ -33,7 +33,7 @@ public class FileHandler : FileHandler<Episode, FilePathFormatter>
         }
         catch (Exception e)
         {
-            Logger.LogCritical(e, "Could not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogError(e, "Could not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }

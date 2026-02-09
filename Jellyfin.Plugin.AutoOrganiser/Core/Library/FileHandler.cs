@@ -91,7 +91,7 @@ public class FileHandler<TItem, TPathFormatter>
         }
         catch (Exception e)
         {
-            Logger.LogCritical(e, "Could not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogError(e, "Could not format a new path for folder: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }
@@ -110,7 +110,7 @@ public class FileHandler<TItem, TPathFormatter>
         }
         catch (Exception e)
         {
-            Logger.LogCritical(e, "Could not format a new path for item: {Name} - {Path}", item.Name, item.Path);
+            Logger.LogError(e, "Could not format a new path for item: {Name} - {Path}", item.Name, item.Path);
             throw;
         }
     }
