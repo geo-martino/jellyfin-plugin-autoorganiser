@@ -8,8 +8,6 @@
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Build and Release" src="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml/badge.svg"/></img></a>
         <a href="https://jellyfin.org/"><img alt="Jellyfin Version" src="https://img.shields.io/badge/Jellyfin-10.11-blue.svg"/></img></a>
     </p>
-</div>
-<div align="center">
     <p>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser"><img alt="Code Size" src="https://img.shields.io/github/languages/code-size/geo-martino/jellyfin-plugin-autoorganiser?label=Code%20Size"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/geo-martino/jellyfin-plugin-autoorganiser?logo=github&label=Contributors"/></img></a>
