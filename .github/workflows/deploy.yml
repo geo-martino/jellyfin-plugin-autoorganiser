@@ -21,6 +21,7 @@ jobs:
         with:
           repository: geo-martino/jellyfin-plugin-repository
           sparse-checkout: ./.github/actions/
+          clean: false
 
       - name: Check for action
         run: |
