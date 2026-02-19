@@ -63,10 +63,10 @@ jobs:
       - name: 📝 Update manifest
         uses: ./repository/.github/actions/update-manifest
         with:
-          name: "AutoOrganiser"
+          name: "Auto-Organiser"
           overview: "Automatically organise and rename files"
           description: "This plugin automatically organises and renames files as recommended by Jellyfin."
-          category: "File Organiser"
+          category: "File Administration"
           plugin-id: ${{ needs.build.outputs.plugin-id }}
           plugin-version: ${{ needs.build.outputs.plugin-version }}
           abi-version: ${{ needs.build.outputs.abi-version }}
