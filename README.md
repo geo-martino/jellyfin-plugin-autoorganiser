@@ -1,12 +1,22 @@
 # Jellyfin Auto-Organiser Plugin
 
-[![Code Size](https://img.shields.io/github/languages/code-size/geo-martino/jellyfin-plugin-autoorganiser?label=Code%20Size)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser)
-[![Contributors](https://img.shields.io/github/contributors/geo-martino/jellyfin-plugin-autoorganiser?logo=github&label=Contributors)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/graphs/contributors)
-[![License](https://img.shields.io/github/license/geo-martino/jellyfin-plugin-autoorganiser?label=License)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/blob/master/LICENSE)
-</br>
-[![GitHub - Validate](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/validate.yml/badge.svg?branch=master)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/validate.yml)
-[![GitHub - Deployment](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml/badge.svg?event=release)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml)
-[![GitHub - Documentation](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/docs_publish.yml/badge.svg)](https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/docs_publish.yml)
+<div align="center">
+    <p>
+        <img alt="Logo" src="https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-autoorganiser/master/images/logo.jpg" height="350"/></br>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Total GitHub Downloads" src="https://img.shields.io/github/downloads/geo-martino/jellyfin-plugin-autoorganiser/total"/></img></a>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/issues"><img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/geo-martino/jellyfin-plugin-autoorganiser"/></img></a>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Build and Release" src="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml/badge.svg"/></img></a>
+        <a href="https://jellyfin.org/"><img alt="Jellyfin Version" src="https://img.shields.io/badge/Jellyfin-10.11-blue.svg"/></img></a>
+    </p>
+</div>
+
+<div align="center">
+    <p>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser"><img alt="Code Size" src="https://img.shields.io/github/languages/code-size/geo-martino/jellyfin-plugin-autoorganiser?label=Code%20Size"/></img></a>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/geo-martino/jellyfin-plugin-autoorganiser?logo=github&label=Contributors"/></img></a>
+        <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/geo-martino/jellyfin-plugin-autoorganiser?label=License"/></img></a>
+    </p>
+</div>
 
 This plugin automatically organises and renames files as recommended by Jellyfin for
 - [movies](https://jellyfin.org/docs/general/server/media/movies)
