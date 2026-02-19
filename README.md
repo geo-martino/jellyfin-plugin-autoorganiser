@@ -19,6 +19,15 @@ This plugin automatically organises and renames files as recommended by Jellyfin
 - [movies](https://jellyfin.org/docs/general/server/media/movies)
 - [shows](https://jellyfin.org/docs/general/server/media/shows)
 
+## 📦 How to Install
+
+1. Add this repository URL to your Jellyfin plugin catalog:
+```
+https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-repository/master/manifest.json
+```
+2. Install the plugin
+3. Restart Jellyfin
+
 ## Configuration
 
 You may configure the plugin via the Jellyfin UI by going to the plugin's settings page. You will be able to configure from the options as shown below.
