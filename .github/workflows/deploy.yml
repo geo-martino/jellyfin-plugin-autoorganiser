@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and release
+    name: 🏗️ Build and release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -45,7 +45,7 @@ jobs:
           is-release: true
 
   update-manifest:
-    name: Update manifest
+    name: 📝 Update manifest
     runs-on: ubuntu-latest
     needs: [ build ]
     environment: update-manifest
