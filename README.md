@@ -7,8 +7,7 @@
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/issues"><img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/geo-martino/jellyfin-plugin-autoorganiser"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Build and Release" src="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml/badge.svg"/></img></a>
         <a href="https://jellyfin.org/"><img alt="Jellyfin Version" src="https://img.shields.io/badge/Jellyfin-10.11-blue.svg"/></img></a>
-    </p>
-    <p>
+    <br>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser"><img alt="Code Size" src="https://img.shields.io/github/languages/code-size/geo-martino/jellyfin-plugin-autoorganiser?label=Code%20Size"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/geo-martino/jellyfin-plugin-autoorganiser?logo=github&label=Contributors"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/geo-martino/jellyfin-plugin-autoorganiser?label=License"/></img></a>
