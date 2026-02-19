@@ -16,17 +16,16 @@
 </div>
 
 This plugin automatically organises and renames files as recommended by Jellyfin for
-- [movies](https://jellyfin.org/docs/general/server/media/movies)
-- [shows](https://jellyfin.org/docs/general/server/media/shows)
+- [Movies](https://jellyfin.org/docs/general/server/media/movies)
+- [Shows](https://jellyfin.org/docs/general/server/media/shows)
 
-## 📦 How to Install
+## ✨ Features
 
-1. Add this repository URL to your Jellyfin plugin catalog:
-```
-https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-repository/master/manifest.json
-```
-2. Install the plugin
-3. Restart Jellyfin
+- Automatic Renaming: Renames files to follow standard conventions (e.g., Series (Year) - S01E01 - Episode Title.ext).
+- Library Sorting: Moves or copies files into your structured library folders (e.g., /Media/TV Shows/Show Name/Season 01/).
+- Duplicate Handling: Options to overwrite existing files or skip duplicates.
+- Clean Up: Automatically removes empty source folders after successful organization.
+- Scheduled Organisation: Integration with Jellyfin's Scheduled Tasks to periodically re-evaluate and organise files for newly added or changed items.
 
 ## Configuration
 
@@ -38,3 +37,15 @@ You may configure the plugin via the Jellyfin UI by going to the plugin's settin
         <img alt="Configuration page 2" src="https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-autoorganiser/master/images/config_2.png" width="600"/>
     </p>
 </div>
+
+## 📦 How to Install
+
+1. Add this repository URL to your Jellyfin plugin catalog:
+```
+https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-repository/master/manifest.json
+```
+2. Install the plugin
+3. Restart Jellyfin
+
+## 🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
