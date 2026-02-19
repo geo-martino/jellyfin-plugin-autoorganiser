@@ -20,8 +20,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: geo-martino/jellyfin-plugin-repository
+          path: repository/
           sparse-checkout: ./.github/actions/
-          clean: false
 
       - name: Check for action
         run: |
@@ -31,7 +31,7 @@ jobs:
           ls "Jellyfin.Plugin.AutoOrganiser"
 
       - name: 📦 Update release with package artifact
-        uses: ./.github/actions/build-plugin
+        uses: ./repository/.github/actions/build-plugin
         with:
           dotnet-version: "9.0.x"
           project-dir: "Jellyfin.Plugin.AutoOrganiser"
