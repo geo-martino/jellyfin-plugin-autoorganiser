@@ -26,9 +26,8 @@ jobs:
       - name: Check for action
         run: |
           find . -iname 'action*'
-          ls ./.github/actions/
           ls .
-          ls "Jellyfin.Plugin.AutoOrganiser"
+          ls *
 
       - name: 📦 Update release with package artifact
         uses: ./repository/.github/actions/build-plugin
