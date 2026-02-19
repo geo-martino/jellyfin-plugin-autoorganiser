@@ -23,16 +23,10 @@ jobs:
           path: repository/
           sparse-checkout: ./.github/actions/
 
-      - name: Check for action
-        run: |
-          find . -iname 'action*'
-          ls .
-          ls *
-
       - name: 📦 Update release with package artifact
         uses: ./repository/.github/actions/build-plugin
         with:
           dotnet-version: "9.0.x"
           project-dir: "Jellyfin.Plugin.AutoOrganiser"
           logo-file: "images/logo.jpg"
-          is-release: false
+          is-release: true
