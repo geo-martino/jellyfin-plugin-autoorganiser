@@ -41,7 +41,7 @@ jobs:
         with:
           dotnet-version: "9.0.x"
           project-dir: "Jellyfin.Plugin.AutoOrganiser"
-          logo-file: "images/logo.jpg"
+          logo-file: "images/logo.png"
           is-release: true
 
   update-manifest:
@@ -72,5 +72,5 @@ jobs:
           abi-version: ${{ needs.build.outputs.abi-version }}
           artifact-name: ${{ needs.build.outputs.artifact-name }}
           artifact-checksum: ${{ needs.build.outputs.artifact-checksum }}
-          image-file: "images/logo.jpg"
+          image-file: "images/logo.png"
           github-token: "${{ secrets.GH_TOKEN }}"
