@@ -2,7 +2,8 @@
 
 <div align="center">
     <p>
-        <img alt="Logo" src="https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-autoorganiser/master/images/logo.png" height="350"/></br>
+        <img alt="Logo" src="https://raw.githubusercontent.com/geo-martino/jellyfin-plugin-autoorganiser/master/images/logo.png" height="350"/>
+    <br>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Total GitHub Downloads" src="https://img.shields.io/github/downloads/geo-martino/jellyfin-plugin-autoorganiser/total"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/issues"><img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/geo-martino/jellyfin-plugin-autoorganiser"/></img></a>
         <a href="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/releases"><img alt="Build and Release" src="https://github.com/geo-martino/jellyfin-plugin-autoorganiser/actions/workflows/deploy.yml/badge.svg"/></img></a>
