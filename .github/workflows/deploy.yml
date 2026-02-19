@@ -24,6 +24,11 @@ jobs:
           repository: geo-martino/jellyfin-plugin-repository
           path: ./.github/actions/
 
+      - name: Check for action
+        run: |
+          find . -iname 'action*'
+          ls ./.github/actions/
+
       - name: 📦 Update release with package artifact
         uses: ./.github/actions/build-plugin
         with:
