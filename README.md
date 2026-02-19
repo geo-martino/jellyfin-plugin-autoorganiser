@@ -21,11 +21,11 @@ This plugin automatically organises and renames files as recommended by Jellyfin
 
 ## ✨ Features
 
-- Automatic Renaming: Renames files to follow standard conventions (e.g., Series (Year) - S01E01 - Episode Title.ext).
-- Library Sorting: Moves or copies files into your structured library folders (e.g., /Media/TV Shows/Show Name/Season 01/).
-- Duplicate Handling: Options to overwrite existing files or skip duplicates.
-- Clean Up: Automatically removes empty source folders after successful organization.
-- Scheduled Organisation: Integration with Jellyfin's Scheduled Tasks to periodically re-evaluate and organise files for newly added or changed items.
+- **Automatic Renaming**: Renames files to follow standard conventions (e.g., Series (Year) - S01E01 - Episode Title.ext).
+- **Library Sorting**: Moves or copies files into your structured library folders (e.g., /Media/TV Shows/Show Name/Season 01/).
+- **Duplicate Handling**: Options to overwrite existing files or skip duplicates.
+- **Clean Up**: Automatically removes empty source folders after successful organization.
+- **Scheduled Organisation**: Integration with Jellyfin's Scheduled Tasks to periodically re-evaluate and organise files for newly added or changed items.
 
 ## Configuration
 
