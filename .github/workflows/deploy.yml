@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   build:
+    name: Build and release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,6 +45,7 @@ jobs:
           is-release: true
 
   update-manifest:
+    name: Update manifest
     runs-on: ubuntu-latest
     needs: [ build ]
     steps:
@@ -57,7 +59,7 @@ jobs:
           path: repository/
           sparse-checkout: ./.github/actions/
 
-      - name: 📦 Update release with package artifact
+      - name: 📝 Update manifest
         uses: ./repository/.github/actions/update-manifest
         with:
           name: "AutoOrganiser"
