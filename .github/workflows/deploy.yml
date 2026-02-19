@@ -1,0 +1,32 @@
+name: "🚀 Deploy package to manifest   "
+run-name: "🚀 Deploy package to manifest: ${{ github.ref_name }}"
+
+on:
+  release:
+    types: [ published ]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    steps:
+      - name: 🛒 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🛒 Checkout actions
+        uses: actions/checkout@v3
+        with:
+          repository: geo-martino/jellyfin-plugin-repository
+          path: .github/actions/
+
+      - name: 📦 Update release with package artifact
+        uses: ./.github/actions/build-plugin
+        with:
+          dotnet-version: "9.0.x"
+          project-dir: "Jellyfin.Plugin.AutoOrganiser"
+          logo-file: "images/logo.jpg"
+          is-release: false
